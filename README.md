@@ -1,0 +1,1 @@
+# swarajya-trails-app
