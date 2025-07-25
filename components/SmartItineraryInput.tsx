@@ -28,14 +28,6 @@ const POPULAR_FORTS: FortSuggestion[] = [
     { name: 'Harishchandragad', region: 'Ahmednagar', difficulty: 'Difficult', category: 'Ancient Temple Complex' }
 ];
 
-const QUICK_TRIP_SUGGESTIONS = [
-    'Day trip near Pune',
-    'Weekend getaway from Mumbai', 
-    'Easy trek for beginners',
-    'Monsoon trek adventure',
-    'Historical forts tour',
-    'Photography expedition'
-];
 
 const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
     filters,
@@ -62,12 +54,6 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
         setInputError('');
     };
 
-    const handleQuickTripClick = (suggestion: string) => {
-        const newFilters = { ...filters, fortsList: suggestion };
-        onFiltersChange(newFilters);
-        setCustomInput(suggestion);
-        setInputError('');
-    };
 
     const handleCustomInputChange = (value: string) => {
         setCustomInput(value);
@@ -234,25 +220,6 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                 </div>
             )}
 
-            {/* Quick Trip Suggestions */}
-            <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Quick Trip Ideas</h4>
-                <div className="flex flex-wrap gap-2">
-                    {QUICK_TRIP_SUGGESTIONS.map((suggestion, index) => (
-                        <button
-                            key={index}
-                            onClick={() => handleQuickTripClick(suggestion)}
-                            className={`px-3 py-1 text-sm rounded-full transition-all ${
-                                filters.fortsList === suggestion
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
-                            }`}
-                        >
-                            {suggestion}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             {inputMode === 'custom' && canGenerate && (
                 <button
