@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">swarajya-trails</string>
+    <string name="title_activity_main">swarajya-trails</string>
+    <string name="package_name">place.run.swarajyatrails</string>
+    <string name="custom_url_scheme">place.run.swarajyatrails</string>
+</resources>

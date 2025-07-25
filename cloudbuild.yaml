@@ -1,0 +1,31 @@
+steps:
+  # Get the API key from Secret Manager
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Retrieving API key from Secret Manager..."
+        gcloud secrets versions access latest --secret=gemini-api-key | tr -d '\n' > /workspace/api-key.txt
+        echo "API key retrieved successfully (length: $$(wc -c < /workspace/api-key.txt))"
+
+  # Build the Docker image with the API key
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        API_KEY=$$(cat /workspace/api-key.txt)
+        echo "Building Docker image with API key (length: $${#API_KEY})..."
+        docker build \
+          --build-arg GEMINI_API_KEY="$$API_KEY" \
+          -t gcr.io/$PROJECT_ID/swarajya-trails:latest \
+          --progress=plain \
+          .
+
+  # Push the image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/swarajya-trails:latest']
+
+images:
+  - 'gcr.io/$PROJECT_ID/swarajya-trails:latest'
