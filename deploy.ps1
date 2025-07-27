@@ -104,7 +104,7 @@ Write-Host "🌍 Your app is available at: $ServiceUrl" -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "📊 To view logs:" -ForegroundColor Blue
-Write-Host "gcloud logging read `"resource.type=cloud_run_revision AND resource.labels.service_name=$ServiceName`" --limit=50 --project=$ProjectId" -ForegroundColor Cyan
+Write-Host "gcloud logging read 'resource.type=cloud_run_revision AND resource.labels.service_name=$ServiceName' --limit=50 --project=$ProjectId" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "🔧 To manage your service:" -ForegroundColor Blue
 Write-Host "https://console.cloud.google.com/run/detail/$Region/$ServiceName/metrics?project=$ProjectId" -ForegroundColor Cyan
