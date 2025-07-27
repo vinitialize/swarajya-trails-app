@@ -1,0 +1,46 @@
+{
+  "parameters": {
+    "android_features_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Master switch for Android-specific features",
+      "valueType": "BOOLEAN"
+    },
+    "push_notifications_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Enable push notifications on Android",
+      "valueType": "BOOLEAN"
+    },
+    "offline_mode_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Enable offline mode with local caching",
+      "valueType": "BOOLEAN"
+    },
+    "native_sharing_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Enable native Android sharing functionality",
+      "valueType": "BOOLEAN"
+    },
+    "biometric_auth_enabled": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "description": "Enable biometric authentication (experimental)",
+      "valueType": "BOOLEAN"
+    },
+    "background_sync_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Enable background data synchronization",
+      "valueType": "BOOLEAN"
+    }
+  }
+}

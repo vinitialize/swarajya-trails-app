@@ -1,0 +1,54 @@
+{
+  "parameters": {
+    "app_stage": {
+      "defaultValue": {
+        "value": "production"
+      }
+    },
+    "features_enabled": {
+      "defaultValue": {
+        "value": "true"
+      }
+    },
+    "itinerary_generation_enabled": {
+      "defaultValue": {
+        "value": "false"
+      }
+    },
+    "fort_suggestions_enabled": {
+      "defaultValue": {
+        "value": "true"
+      }
+    },
+    "search_enabled": {
+      "defaultValue": {
+        "value": "false"
+      }
+    },
+    "maintenance_mode": {
+      "defaultValue": {
+        "value": "false"
+      }
+    },
+    "maintenance_message": {
+      "defaultValue": {
+        "value": "App is currently under maintenance. Please try again later."
+      }
+    },
+    "whitelisted_users": {
+      "defaultValue": {
+        "value": "admin@swarajyatrails.com,test@example.com"
+      }
+    },
+    "min_app_version": {
+      "defaultValue": {
+        "value": "1.0.0"
+      }
+    },
+    "feature_announcement": {
+      "defaultValue": {
+        "value": ""
+      }
+    }
+  }
+}

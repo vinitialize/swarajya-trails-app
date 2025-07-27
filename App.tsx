@@ -3,6 +3,9 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { ItineraryDisplay } from './components/ItineraryDisplay';
 import SmartItineraryInput from './components/SmartItineraryInput';
+import FeatureGuard, { useFeatureFlags } from './components/FeatureGuard';
+import DebugPanel from './components/DebugPanel';
+import AdminPanel from './components/AdminPanel';
 import { generateItinerary, ItineraryFilters, getInspiration, ItineraryResult } from './services/geminiService';
 import { LightbulbIcon, LocationPinIcon, SparklesIcon } from './components/icons';
 
@@ -22,6 +25,9 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showItinerary, setShowItinerary] = useState<boolean>(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
+  
+  // Get feature flags to check maintenance mode
+  const { featureFlags } = useFeatureFlags();
   
   const filters: ItineraryFilters = {
     fortsList: forts,
@@ -102,39 +108,54 @@ const App: React.FC = () => {
   
   return (
     <>
-      <div className="min-h-screen flex flex-col">
-        <Header theme={theme} onThemeToggle={handleThemeToggle} />
-        <main className="container mx-auto px-4 py-8 flex-grow w-full">
-          <div className="max-w-3xl mx-auto flex flex-col gap-8">
-            <SmartItineraryInput
-              filters={filters}
-              onFiltersChange={(newFilters) => {
-                setForts(newFilters.fortsList);
-              }}
-              onGenerateItinerary={handleGenerateItinerary}
-              isLoading={isLoading}
-            />
-
-            {error && (
-              <div className="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative animate-fade-in-up" role="alert">
-                <strong className="font-bold">Oops! </strong>
-                <span className="block sm:inline">{error}</span>
-              </div>
-            )}
-
-            {showItinerary && (
-              <div id="itinerary-section" className="animate-fade-in-up" style={{ animationDelay: '150ms', opacity: 0 }}>
-                <ItineraryDisplay 
-                  content={itinerary?.itineraryText ?? null} 
+      <FeatureGuard>
+        <div className="min-h-screen flex flex-col">
+          <Header theme={theme} onThemeToggle={handleThemeToggle} />
+          <main className="container mx-auto px-4 py-8 flex-grow w-full">
+            <div className="max-w-3xl mx-auto flex flex-col gap-8">
+              
+              {/* Fort Suggestions - Controlled by feature flag */}
+              <FeatureGuard feature="fortSuggestionsEnabled">
+                <SmartItineraryInput
+                  filters={filters}
+                  onFiltersChange={(newFilters) => {
+                    setForts(newFilters.fortsList);
+                  }}
+                  onGenerateItinerary={handleGenerateItinerary}
                   isLoading={isLoading}
-                  userLocation={userLocation}
-                  fortCoordinates={itinerary?.coordinates ?? null}
-                 />
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
+                />
+              </FeatureGuard>
+
+              {error && (
+                <div className="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative animate-fade-in-up" role="alert">
+                  <strong className="font-bold">Oops! </strong>
+                  <span className="block sm:inline">{error}</span>
+                </div>
+              )}
+
+              {/* Itinerary Generation - Controlled by feature flag */}
+              {showItinerary && (
+                <FeatureGuard feature="itineraryGenerationEnabled">
+                  <div id="itinerary-section" className="animate-fade-in-up" style={{ animationDelay: '150ms', opacity: 0 }}>
+                    <ItineraryDisplay 
+                      content={itinerary?.itineraryText ?? null} 
+                      isLoading={isLoading}
+                      userLocation={userLocation}
+                      fortCoordinates={itinerary?.coordinates ?? null}
+                     />
+                  </div>
+                </FeatureGuard>
+              )}
+            </div>
+          </main>
+        </div>
+        
+        {/* Debug Panel - only shows in development */}
+        <DebugPanel />
+      </FeatureGuard>
+      
+      {/* Admin Panel - Only shown during maintenance mode */}
+      {featureFlags?.maintenanceMode && <AdminPanel />}
     </>
   );
 };
