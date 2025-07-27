@@ -70,9 +70,9 @@ if (-not $secretExists) {
     Write-Host "✅ Gemini API key secret found" -ForegroundColor Green
 }
 
-# Build and push the container image
+# Build and push the container image using Cloud Build configuration
 Write-Host "🏗️  Building container image..." -ForegroundColor Blue
-gcloud builds submit --tag $ImageName
+gcloud builds submit --config=cloudbuild.yaml
 
 # Update the service configuration with the correct PROJECT_ID
 Write-Host "📝 Updating service configuration..." -ForegroundColor Blue
