@@ -154,14 +154,23 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
            (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
   };
 
-  // Open maps with mobile-friendly approach
+  // Detect if we're in an Android WebView
+  const isAndroidWebView = () => {
+    const ua = navigator.userAgent;
+    return ua.includes('Android') && (ua.includes('wv') || ua.includes('WebView'));
+  };
+
+  // Open maps with WebView-friendly approach
   const openMapsUrl = (url: string) => {
     try {
-      if (isMobile()) {
-        // For mobile devices, try to use location.href which works better in WebViews
+      if (isAndroidWebView()) {
+        // For Android WebView, use window.open with _self to avoid intent URLs
+        window.open(url, '_self');
+      } else if (isMobile()) {
+        // For other mobile devices, try to use location.href
         window.location.href = url;
       } else {
-        // For desktop, use window.open
+        // For desktop, use window.open with new tab
         const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
         
         // Fallback if popup was blocked
@@ -170,8 +179,13 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
         }
       }
     } catch (error) {
-      // Final fallback - direct navigation
-      window.location.href = url;
+      // Final fallback - try window.open with _self
+      try {
+        window.open(url, '_self');
+      } catch (finalError) {
+        // Last resort - direct navigation
+        window.location.href = url;
+      }
     }
   };
 
