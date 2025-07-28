@@ -154,6 +154,16 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
            (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
   };
 
+  // Detect if we're on iOS
+  const isIOS = () => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  };
+
+  // Detect if we're on Android
+  const isAndroid = () => {
+    return /Android/.test(navigator.userAgent);
+  };
+
   // Detect if we're in an Android WebView
   const isAndroidWebView = () => {
     const ua = navigator.userAgent;
@@ -200,29 +210,77 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
     }
   };
 
-  // Open maps with WebView-compatible approach
-  const openMapsUrl = (url: string, fallbackInfo?: { origin?: string; destination: string; coordinates?: { lat: number; lng: number } }) => {
+  // Try to open Google Maps app first, then fallback to web
+  const openMapsApp = (appUrl: string, webUrl: string, fallbackInfo?: { origin?: string; destination: string; coordinates?: { lat: number; lng: number } }) => {
     if (isAndroidWebView() && fallbackInfo) {
       // For Android WebView, show navigation options instead of trying to open URLs
       showNavigationOptions(fallbackInfo.origin || '', fallbackInfo.destination, fallbackInfo.coordinates);
       return;
     }
 
-    // For non-WebView environments, try normal navigation
-    try {
-      if (isMobile()) {
-        window.location.href = url;
-      } else {
-        const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-          window.location.href = url;
-        }
+    // For mobile devices, try to open the Google Maps app first
+    if (isMobile()) {
+      try {
+        // Create a temporary link to test if the app can be opened
+        const testLink = document.createElement('a');
+        testLink.href = appUrl;
+        testLink.style.display = 'none';
+        document.body.appendChild(testLink);
+        
+        // Try to open the app
+        let hasOpened = false;
+        const startTime = Date.now();
+        
+        // Listen for blur event to detect if app opened
+        const onBlur = () => {
+          hasOpened = true;
+          cleanup();
+        };
+        
+        // Listen for focus event to detect return from app
+        const onFocus = () => {
+          setTimeout(() => {
+            if (!hasOpened && Date.now() - startTime < 3000) {
+              // App didn't open, fallback to web
+              window.open(webUrl, '_blank', 'noopener,noreferrer');
+            }
+            cleanup();
+          }, 100);
+        };
+        
+        const cleanup = () => {
+          window.removeEventListener('blur', onBlur);
+          window.removeEventListener('focus', onFocus);
+          document.body.removeChild(testLink);
+        };
+        
+        window.addEventListener('blur', onBlur);
+        window.addEventListener('focus', onFocus);
+        
+        // Try to open the app
+        testLink.click();
+        
+        // Fallback timeout
+        setTimeout(() => {
+          if (!hasOpened) {
+            window.open(webUrl, '_blank', 'noopener,noreferrer');
+            cleanup();
+          }
+        }, 2500);
+        
+      } catch (error) {
+        console.log('Failed to open Maps app, falling back to web:', error);
+        window.open(webUrl, '_blank', 'noopener,noreferrer');
       }
-    } catch (error) {
-      if (fallbackInfo) {
-        showNavigationOptions(fallbackInfo.origin || '', fallbackInfo.destination, fallbackInfo.coordinates);
-      } else {
-        alert(`Please copy this URL and open it in your browser: ${url}`);
+    } else {
+      // For desktop, open web version in new tab
+      const newWindow = window.open(webUrl, '_blank', 'noopener,noreferrer');
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        if (fallbackInfo) {
+          showNavigationOptions(fallbackInfo.origin || '', fallbackInfo.destination, fallbackInfo.coordinates);
+        } else {
+          alert(`Please copy this URL and open it in your browser: ${webUrl}`);
+        }
       }
     }
   };
@@ -231,18 +289,39 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
     const originQuery = encodeURIComponent(origin);
     const destinationQuery = encodeURIComponent(destination);
     
-    let mapUrl;
+    // Create platform-specific URLs for mobile apps
+    let appUrl;
+    let webUrl;
     
-    if (isAndroidWebView()) {
-      // For Android WebView, use the most basic Google Maps web URL
-      // This avoids any app-specific parameters that might trigger intent conversion
-      mapUrl = `https://www.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}`;
+    if (fortCoordinates) {
+      // Use coordinates for better accuracy
+      if (isIOS()) {
+        // iOS: Use Apple Maps or Google Maps URL schemes
+        appUrl = `maps://maps.google.com/maps?saddr=${originQuery}&daddr=${fortCoordinates.lat},${fortCoordinates.lng}&directionsmode=driving`;
+      } else if (isAndroid()) {
+        // Android: Use Google Maps intent
+        appUrl = `google.navigation:q=${fortCoordinates.lat},${fortCoordinates.lng}&mode=d`;
+      } else {
+        // Generic geo URL for other mobile platforms
+        appUrl = `geo:${fortCoordinates.lat},${fortCoordinates.lng}?q=${fortCoordinates.lat},${fortCoordinates.lng}`;
+      }
+      webUrl = `https://www.google.com/maps/dir/${originQuery}/${fortCoordinates.lat},${fortCoordinates.lng}/@${fortCoordinates.lat},${fortCoordinates.lng},14z`;
     } else {
-      // For other environments, use the full-featured URL
-      mapUrl = `https://maps.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}&dirflg=d`;
+      // Fallback to text-based search
+      if (isIOS()) {
+        appUrl = `maps://maps.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}&directionsmode=driving`;
+      } else if (isAndroid()) {
+        appUrl = `google.navigation:q=${destinationQuery}&mode=d`;
+      } else {
+        appUrl = `geo:0,0?q=${destinationQuery}`;
+      }
+      webUrl = `https://www.google.com/maps/dir/${originQuery}/${destinationQuery}`;
     }
     
-    openMapsUrl(mapUrl, {
+    console.log('Platform:', isIOS() ? 'iOS' : isAndroid() ? 'Android' : 'Other');
+    console.log('Opening Maps - App URL:', appUrl, 'Web URL:', webUrl);
+    
+    openMapsApp(appUrl, webUrl, {
       origin,
       destination,
       coordinates: fortCoordinates
@@ -252,29 +331,39 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
   const handleViewDestinationOnly = () => {
     const destinationQuery = encodeURIComponent(currentDestination);
     
-    let mapUrl;
+    // Create platform-specific URLs for mobile apps
+    let appUrl;
+    let webUrl;
     
-    if (isAndroidWebView()) {
-      // For Android WebView, use basic www.google.com URLs
-      if (fortCoordinates) {
-        // Use coordinates for more accurate location
-        mapUrl = `https://www.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}`;
+    if (fortCoordinates) {
+      // Use coordinates for better accuracy
+      if (isIOS()) {
+        // iOS: Use Apple Maps or Google Maps
+        appUrl = `maps://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}(${destinationQuery})`;
+      } else if (isAndroid()) {
+        // Android: Use geo intent
+        appUrl = `geo:${fortCoordinates.lat},${fortCoordinates.lng}?q=${fortCoordinates.lat},${fortCoordinates.lng}(${destinationQuery})`;
       } else {
-        // Fallback to text search
-        mapUrl = `https://www.google.com/maps?q=${destinationQuery}`;
+        // Generic geo URL
+        appUrl = `geo:${fortCoordinates.lat},${fortCoordinates.lng}?q=${fortCoordinates.lat},${fortCoordinates.lng}`;
       }
+      webUrl = `https://www.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}+(${destinationQuery})&z=15`;
     } else {
-      // For other environments, use full-featured URLs
-      if (fortCoordinates) {
-        // Use coordinates for more accurate location
-        mapUrl = `https://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}+(${destinationQuery})`;
+      // Fallback to text search
+      if (isIOS()) {
+        appUrl = `maps://maps.google.com/maps?q=${destinationQuery}`;
+      } else if (isAndroid()) {
+        appUrl = `geo:0,0?q=${destinationQuery}`;
       } else {
-        // Fallback to text search
-        mapUrl = `https://maps.google.com/maps?q=${destinationQuery}`;
+        appUrl = `geo:0,0?q=${destinationQuery}`;
       }
+      webUrl = `https://www.google.com/maps/search/${destinationQuery}`;
     }
     
-    openMapsUrl(mapUrl, {
+    console.log('Platform:', isIOS() ? 'iOS' : isAndroid() ? 'Android' : 'Other');
+    console.log('Opening Maps - App URL:', appUrl, 'Web URL:', webUrl);
+    
+    openMapsApp(appUrl, webUrl, {
       destination: currentDestination,
       coordinates: fortCoordinates
     });
@@ -400,7 +489,8 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
       {/* Info */}
       <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 space-y-1">
         <p>• Get turn-by-turn driving directions to your destination</p>
-        <p>• Opens Google Maps (works on mobile devices and desktop)</p>
+        <p>• 📱 Opens Google Maps app on mobile devices, web version on desktop</p>
+        <p>• {fortCoordinates ? '🎯 Using precise GPS coordinates for accuracy' : '🔍 Using text search - edit destination name above for better results'}</p>
         <p>• Make sure to check road conditions before traveling</p>
       </div>
     </div>
