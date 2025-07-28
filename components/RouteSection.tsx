@@ -160,43 +160,68 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
     return ua.includes('Android') && (ua.includes('wv') || ua.includes('WebView') || !ua.includes('Chrome'));
   };
 
-  // Open maps with WebView-friendly approach
-  const openMapsUrl = (url: string) => {
+  // Show navigation options modal for Android WebView
+  const showNavigationOptions = (origin: string, destination: string, coordinates?: { lat: number; lng: number }) => {
+    const coordsText = coordinates ? `${coordinates.lat}, ${coordinates.lng}` : 'Not available';
+    const googleMapsUrl = coordinates 
+      ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
+      : `https://www.google.com/maps/search/${encodeURIComponent(destination)}`;
+    
+    const directionsUrl = origin 
+      ? `https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`
+      : googleMapsUrl;
+
+    const message = `Navigation Information:\n\n` +
+      `📍 Destination: ${destination}\n` +
+      `📊 Coordinates: ${coordsText}\n` +
+      (origin ? `🚗 From: ${origin}\n\n` : '\n') +
+      `To navigate:\n` +
+      `1. Copy this URL and open in your browser:\n${directionsUrl}\n\n` +
+      `2. Or search in Google Maps for:\n"${destination}"\n\n` +
+      (coordinates ? `3. Or use coordinates:\n${coordsText}` : '');
+
+    alert(message);
+  };
+
+  // Copy text to clipboard
+  const copyToClipboard = async (text: string, label: string) => {
     try {
-      if (isAndroidWebView()) {
-        // For Android WebView, create a temporary link and click it
-        // This approach bypasses the intent URL conversion
-        const link = document.createElement('a');
-        link.href = url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else if (isMobile()) {
-        // For other mobile devices, try to use location.href
+      await navigator.clipboard.writeText(text);
+      alert(`${label} copied to clipboard!`);
+    } catch (error) {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert(`${label} copied to clipboard!`);
+    }
+  };
+
+  // Open maps with WebView-compatible approach
+  const openMapsUrl = (url: string, fallbackInfo?: { origin?: string; destination: string; coordinates?: { lat: number; lng: number } }) => {
+    if (isAndroidWebView() && fallbackInfo) {
+      // For Android WebView, show navigation options instead of trying to open URLs
+      showNavigationOptions(fallbackInfo.origin || '', fallbackInfo.destination, fallbackInfo.coordinates);
+      return;
+    }
+
+    // For non-WebView environments, try normal navigation
+    try {
+      if (isMobile()) {
         window.location.href = url;
       } else {
-        // For desktop, use window.open with new tab
         const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-        
-        // Fallback if popup was blocked
         if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
           window.location.href = url;
         }
       }
     } catch (error) {
-      // Final fallback - try creating and clicking a link
-      try {
-        const fallbackLink = document.createElement('a');
-        fallbackLink.href = url;
-        fallbackLink.target = '_blank';
-        fallbackLink.rel = 'noopener noreferrer';
-        document.body.appendChild(fallbackLink);
-        fallbackLink.click();
-        document.body.removeChild(fallbackLink);
-      } catch (finalError) {
-        // Last resort - show a message to user
+      if (fallbackInfo) {
+        showNavigationOptions(fallbackInfo.origin || '', fallbackInfo.destination, fallbackInfo.coordinates);
+      } else {
         alert(`Please copy this URL and open it in your browser: ${url}`);
       }
     }
@@ -217,7 +242,11 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
       mapUrl = `https://maps.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}&dirflg=d`;
     }
     
-    openMapsUrl(mapUrl);
+    openMapsUrl(mapUrl, {
+      origin,
+      destination,
+      coordinates: fortCoordinates
+    });
   };
 
   const handleViewDestinationOnly = () => {
@@ -245,7 +274,10 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
       }
     }
     
-    openMapsUrl(mapUrl);
+    openMapsUrl(mapUrl, {
+      destination: currentDestination,
+      coordinates: fortCoordinates
+    });
   };
 
   // Reset form when section opens
