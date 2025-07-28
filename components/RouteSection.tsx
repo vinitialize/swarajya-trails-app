@@ -157,15 +157,22 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
   // Detect if we're in an Android WebView
   const isAndroidWebView = () => {
     const ua = navigator.userAgent;
-    return ua.includes('Android') && (ua.includes('wv') || ua.includes('WebView'));
+    return ua.includes('Android') && (ua.includes('wv') || ua.includes('WebView') || !ua.includes('Chrome'));
   };
 
   // Open maps with WebView-friendly approach
   const openMapsUrl = (url: string) => {
     try {
       if (isAndroidWebView()) {
-        // For Android WebView, use window.open with _self to avoid intent URLs
-        window.open(url, '_self');
+        // For Android WebView, create a temporary link and click it
+        // This approach bypasses the intent URL conversion
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       } else if (isMobile()) {
         // For other mobile devices, try to use location.href
         window.location.href = url;
@@ -179,12 +186,18 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
         }
       }
     } catch (error) {
-      // Final fallback - try window.open with _self
+      // Final fallback - try creating and clicking a link
       try {
-        window.open(url, '_self');
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = url;
+        fallbackLink.target = '_blank';
+        fallbackLink.rel = 'noopener noreferrer';
+        document.body.appendChild(fallbackLink);
+        fallbackLink.click();
+        document.body.removeChild(fallbackLink);
       } catch (finalError) {
-        // Last resort - direct navigation
-        window.location.href = url;
+        // Last resort - show a message to user
+        alert(`Please copy this URL and open it in your browser: ${url}`);
       }
     }
   };
@@ -193,27 +206,43 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
     const originQuery = encodeURIComponent(origin);
     const destinationQuery = encodeURIComponent(destination);
     
-    // Try Google Maps app URL scheme first (works better on mobile)
-    const mapsAppUrl = `https://maps.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}&dirflg=d`;
+    let mapUrl;
     
-    // Web fallback URL
-    const webUrl = `https://www.google.com/maps/dir/?api=1&origin=${originQuery}&destination=${destinationQuery}&travelmode=driving`;
+    if (isAndroidWebView()) {
+      // For Android WebView, use the most basic Google Maps web URL
+      // This avoids any app-specific parameters that might trigger intent conversion
+      mapUrl = `https://www.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}`;
+    } else {
+      // For other environments, use the full-featured URL
+      mapUrl = `https://maps.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}&dirflg=d`;
+    }
     
-    // Use the more compatible maps.google.com URL for better mobile support
-    openMapsUrl(mapsAppUrl);
+    openMapsUrl(mapUrl);
   };
 
   const handleViewDestinationOnly = () => {
     const destinationQuery = encodeURIComponent(currentDestination);
     
-    // Try coordinate-based search if we have coordinates
     let mapUrl;
-    if (fortCoordinates) {
-      // Use coordinates for more accurate location
-      mapUrl = `https://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}+(${destinationQuery})`;
+    
+    if (isAndroidWebView()) {
+      // For Android WebView, use basic www.google.com URLs
+      if (fortCoordinates) {
+        // Use coordinates for more accurate location
+        mapUrl = `https://www.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}`;
+      } else {
+        // Fallback to text search
+        mapUrl = `https://www.google.com/maps?q=${destinationQuery}`;
+      }
     } else {
-      // Fallback to text search
-      mapUrl = `https://maps.google.com/maps?q=${destinationQuery}`;
+      // For other environments, use full-featured URLs
+      if (fortCoordinates) {
+        // Use coordinates for more accurate location
+        mapUrl = `https://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}+(${destinationQuery})`;
+      } else {
+        // Fallback to text search
+        mapUrl = `https://maps.google.com/maps?q=${destinationQuery}`;
+      }
     }
     
     openMapsUrl(mapUrl);
