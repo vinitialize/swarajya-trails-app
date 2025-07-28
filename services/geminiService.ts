@@ -191,17 +191,23 @@ console.log('API Key Debug Info:', {
     startsWithAI: apiKey?.startsWith('AIza') || false
 });
 
-if (!apiKey) {
-    console.error("VITE_GEMINI_API_KEY environment variable is not set.");
-    throw new Error("VITE_GEMINI_API_KEY environment variable is not set.");
-}
+let genAI: GoogleGenerativeAI | null = null;
+let isApiKeyValid = false;
 
-if (!apiKey.startsWith('AIza')) {
-    console.error("API key format appears invalid. Expected to start with 'AIza'.");
-    throw new Error("API key format appears invalid.");
+if (!apiKey || apiKey === 'your_actual_gemini_api_key_here') {
+    console.warn("⚠️ VITE_GEMINI_API_KEY is not configured. Please set a valid Gemini API key in your .env file.");
+    console.warn("🔗 Get your API key from: https://makersuite.google.com/app/apikey");
+} else if (!apiKey.startsWith('AIza')) {
+    console.warn("⚠️ API key format appears invalid. Expected to start with 'AIza'.");
+} else {
+    try {
+        genAI = new GoogleGenerativeAI(apiKey);
+        isApiKeyValid = true;
+        console.log('✅ Gemini API initialized successfully');
+    } catch (error) {
+        console.error('❌ Failed to initialize Gemini API:', error);
+    }
 }
-
-const genAI = new GoogleGenerativeAI(apiKey);
 
 export interface ItineraryFilters {
     fortsList: string;
@@ -436,6 +442,10 @@ export const getWeatherForecast = async (lat: number, lng: number, date?: string
 };
 
 export const getInspiration = async (filters: ItineraryFilters): Promise<string> => {
+    if (!isApiKeyValid || !genAI) {
+        throw new Error("⚠️ Gemini API key is not configured. Please set your API key in the .env file to enable AI-powered suggestions.\n\n🔗 Get your free API key from: https://makersuite.google.com/app/apikey");
+    }
+
     let prompt = 'Suggest one interesting fort in Maharashtra for a trek.';
     let constraints = '';
     let hasConstraints = false;
@@ -500,6 +510,10 @@ export const getInspiration = async (filters: ItineraryFilters): Promise<string>
 };
 
 export const generateItinerary = async (filters: ItineraryFilters): Promise<ItineraryResult> => {
+    if (!isApiKeyValid || !genAI) {
+        throw new Error("⚠️ Gemini API key is not configured. Please set your API key in the .env file to enable itinerary generation.\n\n🔗 Get your free API key from: https://makersuite.google.com/app/apikey");
+    }
+
     // Check rate limiting
     if (!rateLimiter.canMakeRequest()) {
         const resetTime = Math.ceil(rateLimiter.getTimeUntilReset() / 1000 / 60); // minutes

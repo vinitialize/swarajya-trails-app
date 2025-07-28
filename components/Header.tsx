@@ -17,9 +17,14 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeToggle }) => {
           ) : (
             <img src="/icon.png" alt="Swarajya Trails Logo" className="h-8 w-8 rounded" />
           )}
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-            Swarajya Trails
-          </h1>
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              Swarajya Trails
+            </h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
+              Discover Maharashtra's Historic Forts
+            </p>
+          </div>
         </div>
         <button
           onClick={onThemeToggle}

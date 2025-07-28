@@ -220,19 +220,20 @@ const parseMarkdown = (text: string): React.ReactNode[] => {
 
 
 export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isLoading, userLocation, fortCoordinates }) => {
+  const today = new Date().toISOString().split('T')[0];
+  
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [weather, setWeather] = useState<WeatherResult | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState<boolean>(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [showWeather, setShowWeather] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(today);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedContent, setEditedContent] = useState<string>('');
   const [showRouteSection, setShowRouteSection] = useState<boolean>(false);
   
   const loadingWords = ['Crafting... ✍️', 'Mapping... 🗺️', 'Exploring... 🧭'];
   const [animatedTitle, setAnimatedTitle] = useState(loadingWords[0]);
-
-  const today = new Date().toISOString().split('T')[0];
   
   useEffect(() => {
     if (content) {
@@ -257,13 +258,13 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
     }
   }, [isLoading]);
 
-  const fetchWeather = useCallback(async () => {
+  const fetchWeather = useCallback(async (date?: string) => {
       if (!fortCoordinates) return;
       setIsWeatherLoading(true);
       setWeatherError(null);
       setWeather(null);
       try {
-          const weatherData = await getWeatherForecast(fortCoordinates.lat, fortCoordinates.lng);
+          const weatherData = await getWeatherForecast(fortCoordinates.lat, fortCoordinates.lng, date);
           setWeather(weatherData);
       } catch (err) {
           setWeatherError(err instanceof Error ? err.message : 'Could not fetch weather data.');
@@ -309,6 +310,18 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
     setIsEditing(false);
     setEditedContent(content || ''); // Revert changes to original content
   };
+
+  const handleDateChange = (newDate: string) => {
+    setSelectedDate(newDate);
+    if (fortCoordinates && showWeather) {
+      fetchWeather(newDate);
+    }
+  };
+
+  // Calculate date constraints for date picker
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + 16); // Open-Meteo supports up to 16 days
+  const maxDateString = maxDate.toISOString().split('T')[0];
 
   return (
     <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 p-6 md:p-8">
@@ -397,7 +410,33 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
 
       {showWeather && fortCoordinates && (
           <div className="mb-8 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 animate-fade-in-up" style={{animationDuration: '300ms'}}>
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Current Weather</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Weather Forecast</h3>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                    className="px-3 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    min={today}
+                    max={maxDateString}
+                  />
+                </div>
+              </div>
+              
+              {/* Weather forecast info card */}
+              <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-2">
+                  <InfoIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Plan Your Trek</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                      Check weather up to 16 days ahead to pick the perfect trekking day
+                    </p>
+                  </div>
+                </div>
+              </div>
               
               {isWeatherLoading && <WeatherSkeleton />}
               {weatherError && <p className="text-red-500 dark:text-red-400 text-sm">{weatherError}</p>}

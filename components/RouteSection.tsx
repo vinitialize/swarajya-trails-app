@@ -18,28 +18,90 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
 
   // Extract fort name from itinerary content
   const extractFortName = (content: string): string => {
-    // Look for the specific pattern "Get ready for an exhilarating journey to 'Fort Name'"
+    // Pattern 1: Look for "Get ready for an exhilarating journey to 'Fort Name'"
     const journeyPattern = /Get ready for an exhilarating journey to\s+['"]?([^'"\n]+)['"]?/i;
     const journeyMatch = content.match(journeyPattern);
     
     if (journeyMatch && journeyMatch[1]) {
-      return journeyMatch[1].trim();
+      const name = journeyMatch[1].trim();
+      // Clean up common suffixes that might be included
+      return name.replace(/,.*$/, '').trim();
     }
     
-    // Fallback: Look for fort names in the entire content using pattern matching
-    const fortPattern = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)\s+(Fort|Qila|Gad|Killa)\b/g;
-    let match;
+    // Pattern 2: Look for "# Fort Name" in headings
+    const headingPattern = /^#\s+([^\n]+(?:Fort|Qila|Gad|Killa)[^\n]*)/mi;
+    const headingMatch = content.match(headingPattern);
     
-    while ((match = fortPattern.exec(content)) !== null) {
-      const fortName = `${match[1]} ${match[2]}`;
-      // Skip generic terms like "The Fort Experience"
-      if (!fortName.toLowerCase().includes('experience') && 
-          !fortName.toLowerCase().includes('adventure') &&
-          !fortName.toLowerCase().includes('trek')) {
-        return fortName;
+    if (headingMatch && headingMatch[1]) {
+      const name = headingMatch[1].trim();
+      if (!name.toLowerCase().includes('experience') && 
+          !name.toLowerCase().includes('adventure') &&
+          !name.toLowerCase().includes('trek')) {
+        return name;
       }
     }
     
+    // Pattern 3: Look for fort names in the content with various formats
+    const fortPatterns = [
+      // Standard format: "Name Fort", "Name Qila", etc.
+      /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)\s+(Fort|Qila|Gad|Killa)\b/g,
+      // Reverse format: "Fort Name", "Qila Name", etc.
+      /\b(Fort|Qila|Gad|Killa)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)/g,
+      // With optional particles: "Fort of Name", "Qila e Name", etc.
+      /\b(Fort|Qila|Gad|Killa)\s+(?:of\s+|e\s+)?([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)/g
+    ];
+    
+    for (const pattern of fortPatterns) {
+      let match;
+      pattern.lastIndex = 0; // Reset regex state
+      
+      while ((match = pattern.exec(content)) !== null) {
+        let fortName;
+        
+        // Handle different capture group arrangements
+        if (match[2] && (match[1] === 'Fort' || match[1] === 'Qila' || match[1] === 'Gad' || match[1] === 'Killa')) {
+          // Reverse format: "Fort Name"
+          fortName = `${match[1]} ${match[2]}`;
+        } else if (match[1] && match[2]) {
+          // Standard format: "Name Fort"
+          fortName = `${match[1]} ${match[2]}`;
+        } else {
+          continue;
+        }
+        
+        // Skip generic terms
+        const lowerName = fortName.toLowerCase();
+        if (!lowerName.includes('experience') && 
+            !lowerName.includes('adventure') &&
+            !lowerName.includes('trek') &&
+            !lowerName.includes('trekking') &&
+            !lowerName.includes('trail') &&
+            !lowerName.includes('journey')) {
+          return fortName;
+        }
+      }
+    }
+    
+    // Pattern 4: Look for any capitalized words followed by common fort-related terms
+    const generalPattern = /\b([A-Z][a-zA-Z]{2,}(?:\s+[A-Z][a-zA-Z]{2,})*)\s*(?:fort|qila|gad|killa|castle|citadel)/gi;
+    let generalMatch;
+    
+    while ((generalMatch = generalPattern.exec(content)) !== null) {
+      const name = generalMatch[1].trim();
+      const lowerName = name.toLowerCase();
+      
+      if (name.length > 2 && 
+          !lowerName.includes('experience') && 
+          !lowerName.includes('adventure') &&
+          !lowerName.includes('trek') &&
+          !lowerName.includes('trail') &&
+          !lowerName.includes('journey') &&
+          !lowerName.includes('historic') &&
+          !lowerName.includes('ancient')) {
+        return `${name} Fort`;
+      }
+    }
+        
     // Final fallback to coordinate-based description
     return `Fort Location (${fortCoordinates.lat.toFixed(3)}, ${fortCoordinates.lng.toFixed(3)})`;
   };

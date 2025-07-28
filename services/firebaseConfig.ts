@@ -10,29 +10,45 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const remoteConfig = getRemoteConfig(app);
+// Initialize Firebase with error handling
+let app: any = null;
+let remoteConfig: any = null;
+
+try {
+  // Only initialize Firebase if we have a valid project ID
+  if (firebaseConfig.projectId && firebaseConfig.projectId !== 'undefined') {
+    app = initializeApp(firebaseConfig);
+    remoteConfig = getRemoteConfig(app);
+    console.log('✅ Firebase initialized successfully');
+  } else {
+    console.warn('⚠️ Firebase project ID not found, skipping Firebase initialization');
+  }
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase:', error);
+  console.log('🛡️ App will continue without Firebase features');
+}
 
 // Detect environment
 const isDevelopment = window.location.hostname === 'localhost' || 
                      window.location.hostname === '127.0.0.1' || 
                      window.location.hostname.includes('dev');
 
-// Configure Remote Config settings
-remoteConfig.settings.minimumFetchIntervalMillis = isDevelopment ? 60000 : 300000; // 1 min dev, 5 min prod
-remoteConfig.defaultConfig = {
-  app_stage: isDevelopment ? "development" : "production",
-  features_enabled: isDevelopment ? true : false,
-  itinerary_generation_enabled: isDevelopment ? true : false,
-  fort_suggestions_enabled: isDevelopment ? true : false,
-  search_enabled: isDevelopment ? true : false,
-  maintenance_mode: false,
-  maintenance_message: "App is currently under maintenance. Please try again later.",
-  whitelisted_users: "admin@swarajyatrails.com,test@example.com",
-  min_app_version: "1.0.0",
-  feature_announcement: ""
-};
+// Configure Remote Config settings if available
+if (remoteConfig) {
+  remoteConfig.settings.minimumFetchIntervalMillis = isDevelopment ? 60000 : 300000; // 1 min dev, 5 min prod
+  remoteConfig.defaultConfig = {
+    app_stage: isDevelopment ? "development" : "production",
+    features_enabled: isDevelopment ? true : false,
+    itinerary_generation_enabled: isDevelopment ? true : false,
+    fort_suggestions_enabled: isDevelopment ? true : false,
+    search_enabled: isDevelopment ? true : false,
+    maintenance_mode: false,
+    maintenance_message: "App is currently under maintenance. Please try again later.",
+    whitelisted_users: "admin@swarajyatrails.com,test@example.com",
+    min_app_version: "1.0.0",
+    feature_announcement: ""
+  };
+}
 
 // Feature flags interface
 export interface FeatureFlags {
@@ -65,6 +81,16 @@ let currentFeatureFlags: FeatureFlags = {
 
 export const initializeRemoteConfig = async (): Promise<FeatureFlags> => {
   try {
+    // Check if Firebase config is properly set before attempting to initialize
+    const firebaseProjectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+    const firebaseApiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+    
+    if (!firebaseProjectId || !firebaseApiKey || firebaseApiKey === 'dummy_firebase_api_key' || !remoteConfig) {
+      console.warn('⚠️ Firebase configuration incomplete or remoteConfig not available, using default feature flags');
+      isConfigInitialized = true;
+      return currentFeatureFlags;
+    }
+    
     await fetchAndActivate(remoteConfig);
     
     currentFeatureFlags = {
@@ -86,7 +112,23 @@ export const initializeRemoteConfig = async (): Promise<FeatureFlags> => {
     return currentFeatureFlags;
   } catch (error) {
     console.error('❌ Failed to initialize Remote Config:', error);
-    // Return default development config on error
+    console.log('🛡️ Using default production-safe feature flags');
+    
+    // Use production-safe defaults when Firebase fails
+    currentFeatureFlags = {
+      appStage: "production",
+      featuresEnabled: true,  // Enable features in production
+      itineraryGenerationEnabled: true,
+      fortSuggestionsEnabled: true,
+      searchEnabled: true,
+      maintenanceMode: false,
+      maintenanceMessage: "App is currently under maintenance. Please try again later.",
+      whitelistedUsers: ["admin@swarajyatrails.com"],
+      minAppVersion: "1.0.0",
+      featureAnnouncement: ""
+    };
+    
+    isConfigInitialized = true;
     return currentFeatureFlags;
   }
 };

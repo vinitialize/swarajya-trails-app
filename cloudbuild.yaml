@@ -1,24 +1,43 @@
 steps:
-  # Get the API key from Secret Manager
+  # Get the API keys from Secret Manager
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo "Retrieving API key from Secret Manager..."
-        gcloud secrets versions access latest --secret=gemini-api-key | tr -d '\n' > /workspace/api-key.txt
-        echo "API key retrieved successfully (length: $$(wc -c < /workspace/api-key.txt))"
+        echo "Retrieving API keys from Secret Manager..."
+        gcloud secrets versions access latest --secret=gemini-api-key | tr -d '\n' > /workspace/gemini-api-key.txt
+        echo "Gemini API key retrieved successfully (length: $$(wc -c </workspace/gemini-api-key.txt))"
+        
+        # Try to get Firebase API key, but don't fail if it doesn't exist
+        if gcloud secrets describe firebase-api-key >/dev/null 2>&1; then
+          gcloud secrets versions access latest --secret=firebase-api-key | tr -d '\n' > /workspace/firebase-api-key.txt
+          echo "Firebase API key retrieved successfully (length: $$(wc -c </workspace/firebase-api-key.txt))"
+        else
+          echo "Firebase API key not found in Secret Manager, using placeholder"
+          echo "dummy_firebase_api_key" > /workspace/firebase-api-key.txt
+        fi
 
-  # Build the Docker image with the API key
+  # Build the Docker image with API keys and Firebase config
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        API_KEY=$$(cat /workspace/api-key.txt)
-        echo "Building Docker image with API key (length: $${#API_KEY})..."
+        GEMINI_API_KEY=$$(cat /workspace/gemini-api-key.txt)
+        FIREBASE_API_KEY=$$(cat /workspace/firebase-api-key.txt)
+        echo "Building Docker image with API keys..."
+        echo "Gemini API key length: $${#GEMINI_API_KEY}"
+        echo "Firebase API key length: $${#FIREBASE_API_KEY}"
+        
         docker build \
-          --build-arg GEMINI_API_KEY="$$API_KEY" \
+          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY" \
+          --build-arg FIREBASE_API_KEY="$$FIREBASE_API_KEY" \
+          --build-arg FIREBASE_AUTH_DOMAIN="astute-buttress-463406-b8.firebaseapp.com" \
+          --build-arg FIREBASE_PROJECT_ID="astute-buttress-463406-b8" \
+          --build-arg FIREBASE_STORAGE_BUCKET="astute-buttress-463406-b8.firebasestorage.app" \
+          --build-arg FIREBASE_MESSAGING_SENDER_ID="381076047248" \
+          --build-arg FIREBASE_APP_ID="1:381076047248:web:5aad4a11bb2ec500e1df15" \
           -t gcr.io/$PROJECT_ID/swarajya-trails:latest \
           --progress=plain \
           .

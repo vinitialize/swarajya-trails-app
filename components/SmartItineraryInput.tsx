@@ -332,7 +332,7 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                             : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-slate-700/50 dark:hover:to-slate-600/50'
                     }`}
                 >
-                    ✈️ Plan a Trek
+🥾 Plan a Trek
                 </button>
             </div>
 
