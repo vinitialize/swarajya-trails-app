@@ -36,10 +36,16 @@ try {
 }
 
 # Check if user is authenticated
-$authList = gcloud auth list --filter=status:ACTIVE --format="value(account)" 2>$null
-if (-not $authList) {
-    Write-Host "❌ Error: You are not authenticated with gcloud" -ForegroundColor Red
-    Write-Host "Please run: gcloud auth login" -ForegroundColor Yellow
+try {
+    $authList = gcloud auth list --filter=status:ACTIVE --format="value(account)" 2>$null
+    if (-not $authList -or $authList.Trim() -eq "") {
+        Write-Host "❌ Error: You are not authenticated with gcloud" -ForegroundColor Red
+        Write-Host "Please run: gcloud auth login" -ForegroundColor Yellow
+        exit 1
+    }
+    Write-Host "✅ Authenticated as: $($authList.Split([Environment]::NewLine)[0])" -ForegroundColor Green
+} catch {
+    Write-Host "❌ Error checking authentication: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
 
@@ -55,24 +61,49 @@ gcloud services enable secretmanager.googleapis.com
 
 # Check if GEMINI_API_KEY secret exists
 Write-Host "🔐 Checking for Gemini API key secret..." -ForegroundColor Blue
-$secretExists = gcloud secrets describe gemini-api-key 2>$null
-if (-not $secretExists) {
-    Write-Host "⚠️  Gemini API key secret not found" -ForegroundColor Yellow
-    Write-Host "Please create the secret with your Gemini API key:" -ForegroundColor Yellow
-    Write-Host "echo 'YOUR_GEMINI_API_KEY' | gcloud secrets create gemini-api-key --data-file=-" -ForegroundColor Cyan
-    Write-Host ""
-    $response = Read-Host "Have you created the secret? (y/N)"
-    if ($response -ne "y" -and $response -ne "Y") {
-        Write-Host "❌ Deployment cancelled" -ForegroundColor Red
-        exit 1
+try {
+    $secretCheck = gcloud secrets describe gemini-api-key --format="value(name)" 2>$null
+    if (-not $secretCheck) {
+        Write-Host "⚠️  Gemini API key secret not found" -ForegroundColor Yellow
+        Write-Host "Please create the secret with your Gemini API key:" -ForegroundColor Yellow
+        Write-Host "echo 'YOUR_GEMINI_API_KEY' | gcloud secrets create gemini-api-key --data-file=-" -ForegroundColor Cyan
+        Write-Host ""
+        $response = Read-Host "Have you created the secret? (y/N)"
+        if ($response -ne "y" -and $response -ne "Y") {
+            Write-Host "❌ Deployment cancelled" -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        Write-Host "✅ Gemini API key secret found" -ForegroundColor Green
     }
-} else {
-    Write-Host "✅ Gemini API key secret found" -ForegroundColor Green
+} catch {
+    Write-Host "❌ Error checking secret: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
 }
 
 # Build and push the container image using Cloud Build configuration
 Write-Host "🏗️  Building container image..." -ForegroundColor Blue
-gcloud builds submit --config=cloudbuild.yaml
+try {
+    if (Test-Path "cloudbuild.yaml") {
+        Write-Host "Using cloudbuild.yaml configuration..." -ForegroundColor Yellow
+        $buildResult = gcloud builds submit --config=cloudbuild.yaml 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Build failed: $buildResult" -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        Write-Host "Using direct image build..." -ForegroundColor Yellow
+        $buildResult = gcloud builds submit --tag $ImageName 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Build failed: $buildResult" -ForegroundColor Red
+            exit 1
+        }
+    }
+    Write-Host "✅ Build completed successfully" -ForegroundColor Green
+} catch {
+    Write-Host "❌ Error during build: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
 
 # Update the service configuration with the correct PROJECT_ID
 Write-Host "📝 Updating service configuration..." -ForegroundColor Blue

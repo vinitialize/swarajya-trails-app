@@ -148,21 +148,61 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
     }
   };
 
+  // Detect if we're in a mobile environment
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
+  };
+
+  // Open maps with mobile-friendly approach
+  const openMapsUrl = (url: string) => {
+    try {
+      if (isMobile()) {
+        // For mobile devices, try to use location.href which works better in WebViews
+        window.location.href = url;
+      } else {
+        // For desktop, use window.open
+        const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+        
+        // Fallback if popup was blocked
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          window.location.href = url;
+        }
+      }
+    } catch (error) {
+      // Final fallback - direct navigation
+      window.location.href = url;
+    }
+  };
+
   const openGoogleMapsDirections = (origin: string, destination: string) => {
-    // Use Google Maps directions API with both origin and destination
     const originQuery = encodeURIComponent(origin);
     const destinationQuery = encodeURIComponent(destination);
     
-    // Google Maps directions URL
-    const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${originQuery}&destination=${destinationQuery}&travelmode=driving`;
-    window.open(mapUrl, '_blank', 'noopener,noreferrer');
+    // Try Google Maps app URL scheme first (works better on mobile)
+    const mapsAppUrl = `https://maps.google.com/maps?saddr=${originQuery}&daddr=${destinationQuery}&dirflg=d`;
+    
+    // Web fallback URL
+    const webUrl = `https://www.google.com/maps/dir/?api=1&origin=${originQuery}&destination=${destinationQuery}&travelmode=driving`;
+    
+    // Use the more compatible maps.google.com URL for better mobile support
+    openMapsUrl(mapsAppUrl);
   };
 
   const handleViewDestinationOnly = () => {
-    // For users who just want to see the destination location
     const destinationQuery = encodeURIComponent(currentDestination);
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${destinationQuery}`;
-    window.open(mapUrl, '_blank', 'noopener,noreferrer');
+    
+    // Try coordinate-based search if we have coordinates
+    let mapUrl;
+    if (fortCoordinates) {
+      // Use coordinates for more accurate location
+      mapUrl = `https://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}+(${destinationQuery})`;
+    } else {
+      // Fallback to text search
+      mapUrl = `https://maps.google.com/maps?q=${destinationQuery}`;
+    }
+    
+    openMapsUrl(mapUrl);
   };
 
   // Reset form when section opens
@@ -285,7 +325,7 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
       {/* Info */}
       <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 space-y-1">
         <p>• Get turn-by-turn driving directions to your destination</p>
-        <p>• Google Maps will open in a new tab with your route</p>
+        <p>• Opens Google Maps (works on mobile devices and desktop)</p>
         <p>• Make sure to check road conditions before traveling</p>
       </div>
     </div>
