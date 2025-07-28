@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { CopyIcon, CheckIcon, LocationPinIcon, CalendarIcon, ThermometerIcon, WindIcon, WeatherIcon, WeatherSunnyIcon, WeatherPartlyCloudyIcon, WeatherCloudyIcon, WeatherRainIcon, WeatherWindyIcon, PencilIcon, XIcon, InfoIcon } from './icons';
 import { WeatherResult, getWeatherForecast } from '../services/geminiService';
 import { RouteSection } from './RouteSection';
+import DOMPurify from 'dompurify';
 
 interface ItineraryDisplayProps {
   content: string | null;
@@ -160,13 +161,13 @@ const parseMarkdown = (text: string): React.ReactNode[] => {
       const listTag = listType === 'ul' ? (
         <ul key={`ul-${elements.length}`} className="list-disc list-outside space-y-3 my-4 pl-6 text-slate-700 dark:text-slate-300">
           {listItems.map((item, index) => (
-            <li key={`li-ul-${index}`} className="leading-relaxed" dangerouslySetInnerHTML={{ __html: item }} />
+            <li key={`li-ul-${index}`} className="leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item) }} />
           ))}
         </ul>
       ) : (
         <ol key={`ol-${elements.length}`} className="list-decimal list-outside space-y-3 my-4 pl-6 text-slate-700 dark:text-slate-300">
           {listItems.map((item, index) => (
-            <li key={`li-ol-${index}`} className="leading-relaxed" dangerouslySetInnerHTML={{ __html: item }} />
+            <li key={`li-ol-${index}`} className="leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item) }} />
           ))}
         </ol>
       );
@@ -188,13 +189,13 @@ const parseMarkdown = (text: string): React.ReactNode[] => {
 
     if (line.startsWith('# ')) {
       flushList();
-      elements.push(<h1 key={index} className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-4 mb-6" dangerouslySetInnerHTML={{ __html: formattedLine.substring(2) }} />);
+      elements.push(<h1 key={index} className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-4 mb-6" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedLine.substring(2)) }} />);
     } else if (line.startsWith('## ')) {
       flushList();
-      elements.push(<h2 key={index} className="text-2xl font-semibold text-slate-800 dark:text-slate-200 mt-8 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700" dangerouslySetInnerHTML={{ __html: formattedLine.substring(3) }} />);
+      elements.push(<h2 key={index} className="text-2xl font-semibold text-slate-800 dark:text-slate-200 mt-8 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedLine.substring(3)) }} />);
     } else if (line.startsWith('### ')) {
       flushList();
-      elements.push(<h3 key={index} className="text-xl font-semibold text-slate-800 dark:text-slate-200 mt-6 mb-3" dangerouslySetInnerHTML={{ __html: formattedLine.substring(4) }} />);
+      elements.push(<h3 key={index} className="text-xl font-semibold text-slate-800 dark:text-slate-200 mt-6 mb-3" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedLine.substring(4)) }} />);
     } else if (line.startsWith('* ')) {
       if (listType !== 'ul') {
         flushList();
@@ -209,7 +210,7 @@ const parseMarkdown = (text: string): React.ReactNode[] => {
       listItems.push(olMatch[2].replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-800 dark:text-slate-200">$1</strong>'));
     } else if (line.length > 0) {
       flushList();
-      elements.push(<p key={index} className="my-4 leading-relaxed text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: formattedLine }} />);
+      elements.push(<p key={index} className="my-4 leading-relaxed text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formattedLine) }} />);
     }
   });
 
