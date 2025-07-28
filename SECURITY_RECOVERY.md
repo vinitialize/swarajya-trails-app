@@ -5,16 +5,17 @@
 This document outlines the steps taken to address the security incident where API keys were exposed in the git repository.
 
 ### Compromised Secrets Identified:
-1. **Firebase API Key**: `[REDACTED-API-KEY]`
+1. **Firebase API Key**: `[REDACTED - Key has been revoked and regenerated]`
 2. **Google Gemini API Key**: Referenced in environment variables
 
 ## ✅ Recovery Steps Completed:
 
 ### 1. Key Revocation and Regeneration
-- [ ] Revoke Firebase API key from Firebase Console
-- [ ] Generate new Firebase API key
-- [ ] Revoke Google Gemini API key from Google AI Studio
-- [ ] Generate new Google Gemini API key
+- [x] Revoke Firebase API key from Firebase Console
+- [x] Generate new Firebase API key
+- [x] Revoke Google Gemini API key from Google AI Studio
+- [x] Generate new Google Gemini API key
+- [x] Store secrets in Google Secret Manager
 
 ### 2. Code Security Updates
 - [x] Updated `services/firebaseConfig.ts` to use environment variables
@@ -22,8 +23,16 @@ This document outlines the steps taken to address the security incident where AP
 - [x] Updated `.gitignore` to prevent future exposure
 - [x] Documented security recovery process
 
-### 3. Environment Setup
-After regenerating keys, create a `.env` file with:
+### 3. Google Secret Manager Implementation
+- [x] Implemented Google Secret Manager service (`services/secretManager.ts`)
+- [x] Created build-time secret loader (`scripts/loadSecrets.js`)
+- [x] Added npm scripts for secret management
+- [x] Configured secrets in Google Cloud Secret Manager:
+  - `firebase-api-key`
+  - `gemini-api-key`
+
+### 4. Environment Setup
+With Google Secret Manager, secrets are automatically loaded at build time. For manual setup, create a `.env` file with:
 
 ```bash
 # Firebase Configuration
