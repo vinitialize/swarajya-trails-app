@@ -6,6 +6,7 @@ import SmartItineraryInput from './components/SmartItineraryInput';
 import FeatureGuard, { useFeatureFlags } from './components/FeatureGuard';
 import DebugPanel from './components/DebugPanel';
 import AdminPanel from './components/AdminPanel';
+import { VersionDisplay } from './components/VersionDisplay';
 import { generateItinerary, ItineraryFilters, getInspiration, ItineraryResult } from './services/geminiService';
 import { LightbulbIcon, LocationPinIcon, SparklesIcon } from './components/icons';
 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showItinerary, setShowItinerary] = useState<boolean>(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
   
   // Get feature flags to check maintenance mode
   const { featureFlags } = useFeatureFlags();
@@ -97,6 +99,42 @@ const App: React.FC = () => {
     }
   };
 
+  // Check for admin authentication status
+  useEffect(() => {
+    const checkAdminAuth = () => {
+      const adminAuth = localStorage.getItem('swarajya_admin_auth');
+      const adminExpiry = localStorage.getItem('swarajya_admin_expiry');
+      
+      if (adminAuth && adminExpiry) {
+        const expiryTime = parseInt(adminExpiry);
+        const now = Date.now();
+        
+        if (now < expiryTime && adminAuth === 'authenticated') {
+          setIsAdminAuthenticated(true);
+        } else {
+          // Clean up expired auth
+          localStorage.removeItem('swarajya_admin_auth');
+          localStorage.removeItem('swarajya_admin_expiry');
+          setIsAdminAuthenticated(false);
+        }
+      } else {
+        setIsAdminAuthenticated(false);
+      }
+    };
+
+    checkAdminAuth();
+    
+    // Listen for admin auth changes across tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'swarajya_admin_auth' || e.key === 'swarajya_admin_expiry') {
+        checkAdminAuth();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   useEffect(() => {
     if (showItinerary) {
       const timer = setTimeout(() => {
@@ -153,6 +191,9 @@ const App: React.FC = () => {
         {/* Debug Panel - only shows in development */}
         <DebugPanel />
       </FeatureGuard>
+      
+      {/* Version Display - Only shown to authenticated admin users */}
+      <VersionDisplay show={isAdminAuthenticated} />
       
       {/* Admin Panel - Only shown during maintenance mode */}
       {featureFlags?.maintenanceMode && <AdminPanel />}

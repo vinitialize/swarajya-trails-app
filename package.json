@@ -1,13 +1,14 @@
 {
   "name": "swarajya-trails",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run update-version && vite build",
     "preview": "vite preview",
     "load-secrets": "node scripts/loadSecrets.js",
+    "update-version": "node scripts/updateVersion.js",
     "dev:with-secrets": "npm run load-secrets && npm run dev",
     "build:with-secrets": "npm run load-secrets && npm run build"
   },
