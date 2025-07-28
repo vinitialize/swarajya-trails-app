@@ -12,7 +12,7 @@ steps:
         # Try to get Firebase API key, but don't fail if it doesn't exist
         if gcloud secrets describe firebase-api-key >/dev/null 2>&1; then
           gcloud secrets versions access latest --secret=firebase-api-key | tr -d '\n' > /workspace/firebase-api-key.txt
-          echo "Firebase API key retrieved successfully (length: $$(wc -c </workspace/firebase-api-key.txt))"
+          echo "Firebase API key retrieved successfully (length: $(wc -c </workspace/firebase-api-key.txt))"
         else
           echo "Firebase API key not found in Secret Manager, using placeholder"
           echo "dummy_firebase_api_key" > /workspace/firebase-api-key.txt

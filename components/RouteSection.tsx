@@ -443,49 +443,112 @@ export const RouteSection: React.FC<RouteSectionProps> = ({
         </div>
       </form>
 
-      {/* Alternative Quick Access Methods */}
-      <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-        <h4 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">🚀 Quick Actions</h4>
-        <div className="grid grid-cols-1 gap-2">
+      {/* Embedded Google Maps */}
+      <div className="mt-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+        <h4 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-3">📍 Interactive Map</h4>
+        
+        {/* Embedded Google Maps iframe using free method */}
+        <div className="relative w-full h-64 rounded-lg overflow-hidden border border-green-200 dark:border-green-700">
+          <iframe
+            src={fortCoordinates 
+              ? `https://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}&hl=es&z=15&output=embed`
+              : `https://maps.google.com/maps?q=${encodeURIComponent(currentDestination)}&hl=es&z=15&output=embed`
+            }
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Fort Location Map"
+          ></iframe>
+        </div>
+        
+        {/* Direct Action Buttons */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <button
+            onClick={() => {
+              const directionsUrl = fortCoordinates 
+                ? `https://www.google.com/maps/dir/?api=1&destination=${fortCoordinates.lat},${fortCoordinates.lng}&travelmode=driving`
+                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(currentDestination)}&travelmode=driving`;
+              
+              // Try to open in Google Maps app using intent for Android
+              if (isAndroid()) {
+                const intentUrl = fortCoordinates 
+                  ? `intent://maps.google.com/maps?daddr=${fortCoordinates.lat},${fortCoordinates.lng}&directionsmode=driving#Intent;scheme=https;package=com.google.android.apps.maps;end`
+                  : `intent://maps.google.com/maps?daddr=${encodeURIComponent(currentDestination)}&directionsmode=driving#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+                
+                window.location.href = intentUrl;
+                
+                // Fallback to web version after a short delay
+                setTimeout(() => {
+                  window.open(directionsUrl, '_blank', 'noopener,noreferrer');
+                }, 1000);
+              } else {
+                window.open(directionsUrl, '_blank', 'noopener,noreferrer');
+              }
+            }}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
+          >
+            🧭 Navigate Now
+          </button>
           
-          {/* Google Maps Direct Links */}
-          <div className="flex flex-wrap gap-2">
-            <a
-              href={fortCoordinates 
-                ? `https://www.google.com/maps/search/${encodeURIComponent(currentDestination)}/@${fortCoordinates.lat},${fortCoordinates.lng},15z`
-                : `https://www.google.com/maps/search/${encodeURIComponent(currentDestination)}`
+          <button
+            onClick={() => {
+              const mapsUrl = fortCoordinates 
+                ? `https://www.google.com/maps/search/?api=1&query=${fortCoordinates.lat},${fortCoordinates.lng}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentDestination)}`;
+              
+              // Try to open in Google Maps app using intent for Android
+              if (isAndroid()) {
+                const intentUrl = fortCoordinates 
+                  ? `intent://maps.google.com/maps?q=${fortCoordinates.lat},${fortCoordinates.lng}#Intent;scheme=https;package=com.google.android.apps.maps;end`
+                  : `intent://maps.google.com/maps?q=${encodeURIComponent(currentDestination)}#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+                
+                window.location.href = intentUrl;
+                
+                // Fallback to web version after a short delay
+                setTimeout(() => {
+                  window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                }, 1000);
+              } else {
+                window.open(mapsUrl, '_blank', 'noopener,noreferrer');
               }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-md transition-colors duration-200"
-            >
-              🗺️ Google Maps
-            </a>
-            
-            <a
-              href={fortCoordinates 
-                ? `https://maps.apple.com/?q=${fortCoordinates.lat},${fortCoordinates.lng}&ll=${fortCoordinates.lat},${fortCoordinates.lng}&z=15`
-                : `https://maps.apple.com/?q=${encodeURIComponent(currentDestination)}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
+            }}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 transition-colors duration-200"
+          >
+            📍 View in Maps
+          </button>
+        </div>
+        
+        {/* Alternative App Links */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            onClick={() => {
+              const wazeUrl = fortCoordinates 
+                ? `https://waze.com/ul?ll=${fortCoordinates.lat},${fortCoordinates.lng}&navigate=yes`
+                : `https://waze.com/ul?q=${encodeURIComponent(currentDestination)}&navigate=yes`;
+              window.open(wazeUrl, '_blank', 'noopener,noreferrer');
+            }}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-md transition-colors duration-200"
+            disabled={!fortCoordinates}
+          >
+            🚗 Waze
+          </button>
+          
+          {isIOS() && (
+            <button
+              onClick={() => {
+                const appleMapsUrl = fortCoordinates 
+                  ? `maps://maps.google.com/maps?daddr=${fortCoordinates.lat},${fortCoordinates.lng}&dirflg=d`
+                  : `maps://maps.google.com/maps?daddr=${encodeURIComponent(currentDestination)}&dirflg=d`;
+                window.location.href = appleMapsUrl;
+              }}
               className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/30 hover:bg-gray-100 dark:hover:bg-gray-900/50 rounded-md transition-colors duration-200"
             >
               🍎 Apple Maps
-            </a>
-            
-            {fortCoordinates && (
-              <button
-                onClick={() => {
-                  const wazeUrl = `https://waze.com/ul?ll=${fortCoordinates.lat},${fortCoordinates.lng}&navigate=yes`;
-                  window.open(wazeUrl, '_blank', 'noopener,noreferrer');
-                }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-md transition-colors duration-200"
-              >
-                🚗 Waze
-              </button>
-            )}
-          </div>
+            </button>
+          )}
         </div>
       </div>
 
