@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MountainIcon, SunIcon, MoonIcon } from './icons';
+import { SunIcon, MoonIcon } from './icons';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
@@ -12,7 +12,11 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeToggle }) => {
     <header className="py-4 sm:py-6">
       <div className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center justify-center gap-3">
-          <MountainIcon className="h-8 w-8 text-indigo-500" />
+          {theme === 'dark' ? (
+            <img src="/icon.png" alt="Swarajya Trails Logo" className="h-8 w-8 rounded filter invert brightness-0 contrast-100" />
+          ) : (
+            <img src="/icon.png" alt="Swarajya Trails Logo" className="h-8 w-8 rounded" />
+          )}
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             Swarajya Trails
           </h1>

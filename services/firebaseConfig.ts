@@ -23,10 +23,10 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 remoteConfig.settings.minimumFetchIntervalMillis = isDevelopment ? 60000 : 300000; // 1 min dev, 5 min prod
 remoteConfig.defaultConfig = {
   app_stage: isDevelopment ? "development" : "production",
-  features_enabled: false,
-  itinerary_generation_enabled: false,
-  fort_suggestions_enabled: false,
-  search_enabled: false,
+  features_enabled: isDevelopment ? true : false,
+  itinerary_generation_enabled: isDevelopment ? true : false,
+  fort_suggestions_enabled: isDevelopment ? true : false,
+  search_enabled: isDevelopment ? true : false,
   maintenance_mode: false,
   maintenance_message: "App is currently under maintenance. Please try again later.",
   whitelisted_users: "admin@swarajyatrails.com,test@example.com",
@@ -51,11 +51,11 @@ export interface FeatureFlags {
 // Initialize and fetch remote config
 let isConfigInitialized = false;
 let currentFeatureFlags: FeatureFlags = {
-  appStage: "development",
-  featuresEnabled: false,
-  itineraryGenerationEnabled: false,
-  fortSuggestionsEnabled: false,
-  searchEnabled: false,
+  appStage: isDevelopment ? "development" : "production",
+  featuresEnabled: isDevelopment ? true : false,
+  itineraryGenerationEnabled: isDevelopment ? true : false,
+  fortSuggestionsEnabled: isDevelopment ? true : false,
+  searchEnabled: isDevelopment ? true : false,
   maintenanceMode: false,
   maintenanceMessage: "App is currently under maintenance. Please try again later.",
   whitelistedUsers: ["admin@swarajyatrails.com", "test@example.com"],
