@@ -411,10 +411,10 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
                       getUserLocation();
                     }
                   }}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors whitespace-nowrap min-w-0"
                 >
-                  <NavigationIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
+                  <NavigationIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm truncate">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
                 </button>
               )}
 
