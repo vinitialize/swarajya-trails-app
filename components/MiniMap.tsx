@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { LocationPinIcon, XIcon, DirectionsIcon, MapIcon, SatelliteIcon, TerrainIcon, NavigationIcon, InfoIcon } from './icons';
+import { usePlatformDetection, openGoogleMaps } from '../utils/platformDetection';
 
 interface MiniMapProps {
   coordinates: { lat: number; lng: number };
@@ -44,6 +45,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
   const [directionsService, setDirectionsService] = useState<google.maps.DirectionsService | null>(null);
   const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer | null>(null);
   const [customDestination, setCustomDestination] = useState<string>('');
+  const platform = usePlatformDetection();
 
   const loader = new Loader({
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
@@ -424,7 +426,18 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
                 <span className="hidden sm:inline">Clear Route</span>
               </button>
             )}
-            
+            {/* Android Google Maps Button */}
+            {platform?.isAndroidApp && (
+              <button
+                onClick={() => openGoogleMaps(coordinates, fortName)}
+                className="flex items-center gap-2 px-3 py-2 bg-green-500 dark:bg-green-800/30 text-white dark:text-green-200 rounded-lg text-sm font-medium hover:bg-green-600 dark:hover:bg-green-800/50 transition-colors"
+                title="Open in Google Maps App"
+              >
+                <MapIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Open Maps App</span>
+              </button>
+            )}
+
             {/* Google Maps Button */}
             <button
               onClick={() => {
