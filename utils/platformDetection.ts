@@ -51,16 +51,30 @@ export const openGoogleMaps = (coordinates: { lat: number; lng: number }, placeN
   const platform = detectPlatform();
   
   if (platform.isAndroidApp) {
-    // For Android app users, try to use the geo intent which should work better
+    // For Android app users, try multiple approaches for better compatibility
     const geoUrl = `geo:${coordinates.lat},${coordinates.lng}?q=${coordinates.lat},${coordinates.lng}(${encodeURIComponent(placeName)})`;
+    const googleNavUrl = `google.navigation:q=${coordinates.lat},${coordinates.lng}`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(placeName)}`;
     
-    // Try geo intent first
+    // Try opening via Android intent mechanism
     try {
-      window.location.href = geoUrl;
+      // Create an invisible link and trigger it
+      const link = document.createElement('a');
+      link.href = geoUrl;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Set a timeout to check if the intent was handled
+      setTimeout(() => {
+        // If we're still here after 1 second, try the Google Maps URL fallback
+        window.open(mapsUrl, '_blank');
+      }, 1000);
+      
     } catch (error) {
       console.warn('Geo intent failed, trying Google Maps URL:', error);
-      // Fallback to Google Maps URL
-      const mapsUrl = `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`;
+      // Direct fallback to Google Maps URL
       window.open(mapsUrl, '_blank');
     }
   } else if (platform.isIOS) {

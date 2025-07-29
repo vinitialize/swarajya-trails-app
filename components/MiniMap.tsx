@@ -399,21 +399,38 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
           <div className="flex items-center gap-2">
             {!userLocation && (
               <button
-                onClick={getUserLocation}
+                onClick={() => {
+                  if (platform?.isAndroidApp) {
+                    // For Android app users, open in maps app directly
+                    openGoogleMaps(coordinates, fortName);
+                  } else {
+                    // For web users, get user location first to show directions
+                    getUserLocation();
+                  }
+                }}
                 className="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 rounded-lg text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
               >
                 <NavigationIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Get Directions</span>
+                <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
               </button>
             )}
 
             {userLocation && !showDirections && (
               <button
-                onClick={showDirectionsToFort}
+                onClick={() => {
+                  if (platform?.isAndroidApp) {
+                    // For Android app users, open in maps app directly
+                    openGoogleMaps(coordinates, fortName);
+                  } else {
+                    // For web users, open Google Maps with directions
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(fortName)}`;
+                    window.open(mapsUrl, '_blank');
+                  }
+                }}
                 className="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
               >
                 <DirectionsIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Directions</span>
+                <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
               </button>
             )}
 
@@ -426,36 +443,17 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
                 <span className="hidden sm:inline">Clear Route</span>
               </button>
             )}
-            {/* Android Google Maps Button */}
-            {platform?.isAndroidApp && (
+            {/* Show internal directions for web users only */}
+            {userLocation && !showDirections && !platform?.isAndroidApp && (
               <button
-                onClick={() => openGoogleMaps(coordinates, fortName)}
-                className="flex items-center gap-2 px-3 py-2 bg-green-500 dark:bg-green-800/30 text-white dark:text-green-200 rounded-lg text-sm font-medium hover:bg-green-600 dark:hover:bg-green-800/50 transition-colors"
-                title="Open in Google Maps App"
+                onClick={showDirectionsToFort}
+                className="flex items-center gap-2 px-3 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+                title="Show route on map"
               >
                 <MapIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Open Maps App</span>
+                <span className="hidden sm:inline">Show Route</span>
               </button>
             )}
-
-            {/* Google Maps Button */}
-            <button
-              onClick={() => {
-                try {
-                  // Use Google Maps universal URL format that works better with Android intents
-                  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(fortName)}`;
-                  window.open(mapsUrl, '_blank');
-                } catch (error) {
-                  // Fallback for URL intent errors
-                  setError('Unable to open maps. You can return to the main page to continue exploring.');
-                }
-              }}
-              className="flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-              title="Open in Google Maps"
-            >
-              <MapIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Google Maps</span>
-            </button>
           </div>
         </div>
 
