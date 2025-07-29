@@ -54,7 +54,8 @@ class SecretLoader {
       // Define the secrets we need to load
       const secretsToLoad = [
         { name: 'firebase-api-key', envVar: 'VITE_FIREBASE_API_KEY' },
-        { name: 'gemini-api-key', envVar: 'VITE_GEMINI_API_KEY' }
+        { name: 'gemini-api-key', envVar: 'VITE_GEMINI_API_KEY' },
+        { name: 'google-maps-api-key', envVar: 'VITE_GOOGLE_MAPS_API_KEY' }
       ];
 
       const envContent = [];
@@ -87,8 +88,8 @@ class SecretLoader {
       envContent.push('VITE_FIREBASE_AUTH_DOMAIN=astute-buttress-463406-b8.firebaseapp.com');
       envContent.push('VITE_FIREBASE_PROJECT_ID=astute-buttress-463406-b8');
       envContent.push('VITE_FIREBASE_STORAGE_BUCKET=astute-buttress-463406-b8.firebasestorage.app');
-      envContent.push('VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id');
-      envContent.push('VITE_FIREBASE_APP_ID=your_app_id');
+      envContent.push('VITE_FIREBASE_MESSAGING_SENDER_ID=381076047248');
+      envContent.push('VITE_FIREBASE_APP_ID=1:381076047248:web:5aad4a11bb2ec500e1df15');
       envContent.push('');
       envContent.push('# Google Cloud Configuration');
       envContent.push(`GOOGLE_CLOUD_PROJECT=${this.projectId}`);

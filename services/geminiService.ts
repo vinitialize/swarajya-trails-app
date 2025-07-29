@@ -611,7 +611,7 @@ export const generateItinerary = async (filters: ItineraryFilters): Promise<Itin
     **IMPORTANT**: At the very end of your response, include the coordinates for the main fort on a separate line in this exact format: \`Coordinates: 18.2345, 73.4456\`. This should be the last line of your response and will be used for mapping purposes. Do not include any text after the coordinates.
 
     Structure the entire response using clean, hierarchical markdown. Follow these rules strictly:
-    -   **Main Title:** Use a single Level 1 heading (#) for the overall trip title (e.g., "# Your Epic Fort Adventure: Raigad").
+    -   **Main Title:** Use a single Level 1 heading (#) with ONLY the fort name followed by "Fort" (e.g., "# Raigad Fort" or "# Sinhagad Fort"). Do NOT add words like "Your", "Epic", "Adventure", "Majestic", "Historic", "Ancient", "Magnificent", "Ultimate" or any other descriptive words.
     -   **Main Sections:** Use Level 2 headings (##) for the main sections listed above (e.g., "## Route & Transportation 🚌").
     -   **Sub-sections:** Use Level 3 headings (###) for specific points within a section, for example, for individual forts if multiple are listed under "The Fort Experience 🚩".
     -   **Lists:**

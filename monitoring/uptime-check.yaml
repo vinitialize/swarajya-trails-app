@@ -1,0 +1,29 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: UptimeCheckConfig
+metadata:
+  name: swarajya-trails-uptime-check
+spec:
+  displayName: "Swarajya Trails Uptime Check"
+  monitored_resource:
+    type: "uptime_url"
+    labels:
+      project_id: "YOUR_PROJECT_ID"  # Replace with your actual project ID
+      host: "YOUR_CLOUD_RUN_URL"     # Replace with your actual Cloud Run URL
+  http_check:
+    path: "/health"
+    port: 443
+    use_ssl: true
+    validate_ssl: true
+    request_method: "GET"
+    mask_headers: false
+    headers:
+      User-Agent: "GoogleCloudUptimeCheck-SwarajyaTrails"
+  timeout: "10s"
+  period: "60s"  # Check every minute
+  selected_regions:
+    - "USA_OREGON"
+    - "USA_IOWA" 
+    - "EUROPE_IRELAND"
+  # Failure conditions
+  failure_threshold: 3  # Alert after 3 consecutive failures
+  success_threshold: 1  # Consider healthy after 1 success

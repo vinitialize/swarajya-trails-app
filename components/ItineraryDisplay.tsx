@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { CopyIcon, CheckIcon, LocationPinIcon, CalendarIcon, ThermometerIcon, WindIcon, WeatherIcon, WeatherSunnyIcon, WeatherPartlyCloudyIcon, WeatherCloudyIcon, WeatherRainIcon, WeatherWindyIcon, PencilIcon, XIcon, InfoIcon } from './icons';
+import { CopyIcon, CheckIcon, LocationPinIcon, CalendarIcon, ThermometerIcon, WindIcon, WeatherIcon, WeatherSunnyIcon, WeatherPartlyCloudyIcon, WeatherCloudyIcon, WeatherRainIcon, WeatherWindyIcon, PencilIcon, XIcon, InfoIcon, MapIcon } from './icons';
 import { WeatherResult, getWeatherForecast } from '../services/geminiService';
+import MiniMap from './MiniMap';
 import DOMPurify from 'dompurify';
 
 interface ItineraryDisplayProps {
@@ -229,6 +230,17 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedContent, setEditedContent] = useState<string>('');
+  const [showMap, setShowMap] = useState<boolean>(false);
+  
+  // Extract fort name from content title
+  const getFortName = useCallback((content: string | null): string => {
+    if (!content) return 'Fort Location';
+    
+    // Get the first line (title) and remove markdown header
+    const title = content.split('\n')[0].replace(/^#\s*/, '').trim();
+    
+    return title || 'Fort Location';
+  }, []);
   
   const loadingWords = ['Crafting... ✍️', 'Mapping... 🗺️', 'Exploring... 🧭'];
   const [animatedTitle, setAnimatedTitle] = useState(loadingWords[0]);
@@ -330,6 +342,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
         {!isLoading && content && (
           <div className="flex-shrink-0 flex flex-col sm:flex-row items-end sm:items-center gap-2">
             {fortCoordinates && (
+              <>
                 <button
                     onClick={handleToggleWeather}
                     className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 bg-indigo-100 hover:bg-indigo-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-300"
@@ -337,8 +350,17 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                     aria-expanded={showWeather}
                 >
                   <WeatherIcon className="h-4 w-4" />
-                  Check Weather
+                  Weather
                 </button>
+                <button
+                    onClick={() => setShowMap(true)}
+                    className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 bg-emerald-100 hover:bg-emerald-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-300"
+                    aria-label="Show map location"
+                >
+                  <MapIcon className="h-4 w-4" />
+                  View Route
+                </button>
+              </>
             )}
             
             {isEditing ? (
@@ -479,6 +501,22 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
           </div>
       )}
       
+      {/* MiniMap - Shows at top when visible */}
+      {showMap && fortCoordinates && (
+        <div className="mb-8">
+          <MiniMap
+            coordinates={fortCoordinates}
+            fortName={getFortName(content)}
+            onClose={() => setShowMap(false)}
+            isVisible={showMap}
+            onDestinationChange={(newCoords, newName) => {
+              // Update the fortCoordinates in parent component if needed
+              console.log('Destination updated:', newName, newCoords);
+            }}
+          />
+        </div>
+      )}
+      
       <div className="prose prose-slate dark:prose-invert max-w-none">
         {isLoading ? <SkeletonLoader /> : (
           content ? (
@@ -496,21 +534,6 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
       
       {!isLoading && content && (
         <>
-          {/* Coming Soon Feature Info */}
-          {fortCoordinates && (
-            <div className="mt-8 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 flex items-start gap-3">
-              <InfoIcon className="h-5 w-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
-                  🚧 Route Planning - Coming Soon!
-                </h4>
-                <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
-                  We're working on an interactive route planning feature that will help you navigate to your destination with turn-by-turn directions, multiple map options, and GPS coordinates. Stay tuned for this exciting update!
-                </p>
-              </div>
-            </div>
-          )}
-          
           {/* AI Content Disclaimer */}
           <div className="mt-8 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 flex items-start gap-3">
             <InfoIcon className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />

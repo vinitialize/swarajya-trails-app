@@ -129,4 +129,7 @@ export interface SecretConfig {
   gemini: {
     apiKey: string;
   };
+  googleMaps: {
+    apiKey: string;
+  };
 }

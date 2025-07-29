@@ -266,3 +266,36 @@ export const NavigationIcon: React.FC<IconProps> = (props) => (
     <polygon points="3 11 22 2 13 21 11 13 3 11" />
   </svg>
 );
+
+export const DirectionsIcon: React.FC<IconProps> = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13 17 18 12 13 7" />
+    <polygon points="6 17 11 12 6 7" />
+  </svg>
+);
+
+export const MapIcon: React.FC<IconProps> = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+    <line x1="9" y1="3" x2="9" y2="18" />
+    <line x1="15" y1="6" x2="15" y2="21" />
+  </svg>
+);
+
+export const SatelliteIcon: React.FC<IconProps> = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M13 7 9 3 5 7l4 4" />
+    <path d="m17 11 4 4-4 4-4-4" />
+    <path d="m8 12 4 4 6-6-4-4Z" />
+    <path d="m16 8 3-3" />
+    <path d="M9 21a6 6 0 0 0-6-6" />
+  </svg>
+);
+
+export const TerrainIcon: React.FC<IconProps> = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m4 14 4-4 4 4 4-4 4 4" />
+    <path d="m4 19 4-4 4 4 4-4 4 4" />
+    <path d="M4 5h16" />
+  </svg>
+);
