@@ -384,15 +384,15 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
                   <button
                     key={option.id}
                     onClick={() => handleMapTypeChange(option.id)}
-                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all min-w-0 ${
                       selectedMapType === option.id
                         ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'
                         : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
                     }`}
                     title={option.description}
                   >
-                    <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">{option.name}</span>
+                    <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm truncate">{option.name}</span>
                   </button>
                 );
               })}
