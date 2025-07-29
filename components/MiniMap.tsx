@@ -293,16 +293,16 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
   if (!isVisible) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-      <div className="w-full h-[600px] flex flex-col">
+    <div className="w-full max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="w-full h-[400px] sm:h-[500px] lg:h-[600px] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <LocationPinIcon className="h-6 w-6 text-red-500" />
-            <div>
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">{fortName}</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <LocationPinIcon className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-200 truncate">{fortName}</h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">
+                {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
               </p>
             </div>
           </div>
@@ -316,17 +316,18 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
         </div>
 
         {/* Destination Change */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Destination:</label>
-            <input
-              type="text"
-              value={customDestination || fortName}
-              onChange={(e) => setCustomDestination(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              placeholder="Enter custom destination name..."
-            />
-            <button
+        <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+            <label className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Destination:</label>
+            <div className="flex items-center gap-2 w-full sm:flex-1">
+              <input
+                type="text"
+                value={customDestination || fortName}
+                onChange={(e) => setCustomDestination(e.target.value)}
+                className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Enter custom destination name..."
+              />
+              <button
               onClick={async () => {
                 if (customDestination && customDestination !== fortName) {
                   try {
@@ -363,97 +364,100 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
                   }
                 }
               }}
-              disabled={!customDestination || customDestination === fortName}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              Update
-            </button>
+                disabled={!customDestination || customDestination === fortName}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+              >
+                Update
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-          {/* Map Type Selector */}
-          <div className="flex items-center gap-2">
-            {mapTypeOptions.map((option) => {
-              const IconComponent = option.icon;
-              return (
+        <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            {/* Map Type Selector */}
+            <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
+              {mapTypeOptions.map((option) => {
+                const IconComponent = option.icon;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => handleMapTypeChange(option.id)}
+                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                      selectedMapType === option.id
+                        ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'
+                        : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
+                    }`}
+                    title={option.description}
+                  >
+                    <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{option.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto overflow-x-auto">
+              {!userLocation && (
                 <button
-                  key={option.id}
-                  onClick={() => handleMapTypeChange(option.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedMapType === option.id
-                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
-                  }`}
-                  title={option.description}
+                  onClick={() => {
+                    if (platform?.isAndroidApp) {
+                      // For Android app users, open in maps app directly
+                      openGoogleMaps(coordinates, fortName);
+                    } else {
+                      // For web users, get user location first to show directions
+                      getUserLocation();
+                    }
+                  }}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors whitespace-nowrap"
                 >
-                  <IconComponent className="h-4 w-4" />
-                  <span className="hidden sm:inline">{option.name}</span>
+                  <NavigationIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
                 </button>
-              );
-            })}
-          </div>
+              )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            {!userLocation && (
-              <button
-                onClick={() => {
-                  if (platform?.isAndroidApp) {
-                    // For Android app users, open in maps app directly
-                    openGoogleMaps(coordinates, fortName);
-                  } else {
-                    // For web users, get user location first to show directions
-                    getUserLocation();
-                  }
-                }}
-                className="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 rounded-lg text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-              >
-                <NavigationIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
-              </button>
-            )}
+              {userLocation && !showDirections && (
+                <button
+                  onClick={() => {
+                    if (platform?.isAndroidApp) {
+                      // For Android app users, open in maps app directly
+                      openGoogleMaps(coordinates, fortName);
+                    } else {
+                      // For web users, open Google Maps with directions
+                      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(fortName)}`;
+                      window.open(mapsUrl, '_blank');
+                    }
+                  }}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors whitespace-nowrap"
+                >
+                  <DirectionsIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
+                </button>
+              )}
 
-            {userLocation && !showDirections && (
-              <button
-                onClick={() => {
-                  if (platform?.isAndroidApp) {
-                    // For Android app users, open in maps app directly
-                    openGoogleMaps(coordinates, fortName);
-                  } else {
-                    // For web users, open Google Maps with directions
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(fortName)}`;
-                    window.open(mapsUrl, '_blank');
-                  }
-                }}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-              >
-                <DirectionsIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">{platform?.isAndroidApp ? 'Open Maps' : 'Get Directions'}</span>
-              </button>
-            )}
-
-            {showDirections && (
-              <button
-                onClick={clearDirections}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                <XIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Clear Route</span>
-              </button>
-            )}
-            {/* Show internal directions for web users only */}
-            {userLocation && !showDirections && !platform?.isAndroidApp && (
-              <button
-                onClick={showDirectionsToFort}
-                className="flex items-center gap-2 px-3 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
-                title="Show route on map"
-              >
-                <MapIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Show Route</span>
-              </button>
-            )}
+              {showDirections && (
+                <button
+                  onClick={clearDirections}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors whitespace-nowrap"
+                >
+                  <XIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Clear Route</span>
+                </button>
+              )}
+              {/* Show internal directions for web users only */}
+              {userLocation && !showDirections && !platform?.isAndroidApp && (
+                <button
+                  onClick={showDirectionsToFort}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors whitespace-nowrap"
+                  title="Show route on map"
+                >
+                  <MapIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Show Route</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
