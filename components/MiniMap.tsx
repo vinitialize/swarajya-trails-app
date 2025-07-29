@@ -427,7 +427,16 @@ export const MiniMap: React.FC<MiniMapProps> = ({ coordinates, fortName, onClose
             
             {/* Google Maps Button */}
             <button
-              onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(fortName)}`, '_blank')}
+              onClick={() => {
+                try {
+                  // Use Google Maps universal URL format that works better with Android intents
+                  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(fortName)}`;
+                  window.open(mapsUrl, '_blank');
+                } catch (error) {
+                  // Fallback for URL intent errors
+                  setError('Unable to open maps. You can return to the main page to continue exploring.');
+                }
+              }}
               className="flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
               title="Open in Google Maps"
             >

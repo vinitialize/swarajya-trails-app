@@ -7,6 +7,7 @@ import FeatureGuard, { useFeatureFlags } from './components/FeatureGuard';
 import DebugPanel from './components/DebugPanel';
 import AdminPanel from './components/AdminPanel';
 import { VersionDisplay } from './components/VersionDisplay';
+import ErrorBoundary from './components/ErrorBoundary';
 import { generateItinerary, ItineraryFilters, getInspiration, ItineraryResult } from './services/geminiService';
 import { LightbulbIcon, LocationPinIcon, SparklesIcon } from './components/icons';
 
