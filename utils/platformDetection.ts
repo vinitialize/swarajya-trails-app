@@ -51,10 +51,12 @@ export const openGoogleMaps = (coordinates: { lat: number; lng: number }, placeN
   const platform = detectPlatform();
   
   if (platform.isAndroidApp) {
-    // For Android app users, try multiple approaches for better compatibility
-    const geoUrl = `geo:${coordinates.lat},${coordinates.lng}?q=${coordinates.lat},${coordinates.lng}(${encodeURIComponent(placeName)})`;
-    const googleNavUrl = `google.navigation:q=${coordinates.lat},${coordinates.lng}`;
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}&destination_place_id=${encodeURIComponent(placeName)}`;
+    // For Android app users, use location name for better search results
+    // Primary geo URL with location name and coordinates as fallback
+    const geoUrl = `geo:0,0?q=${encodeURIComponent(placeName)}`;
+    const geoUrlWithCoords = `geo:${coordinates.lat},${coordinates.lng}?q=${encodeURIComponent(placeName)}`;
+    const googleNavUrl = `google.navigation:q=${encodeURIComponent(placeName)}`;
+    const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(placeName)}`;
     
     // Try opening via Android intent mechanism
     try {
@@ -78,9 +80,9 @@ export const openGoogleMaps = (coordinates: { lat: number; lng: number }, placeN
       window.open(mapsUrl, '_blank');
     }
   } else if (platform.isIOS) {
-    // For iOS, try Apple Maps first, then Google Maps
-    const appleUrl = `maps://maps.apple.com/?q=${coordinates.lat},${coordinates.lng}`;
-    const googleUrl = `comgooglemaps://?q=${coordinates.lat},${coordinates.lng}&center=${coordinates.lat},${coordinates.lng}&zoom=15`;
+    // For iOS, try Apple Maps first with location name, then Google Maps
+    const appleUrl = `maps://maps.apple.com/?q=${encodeURIComponent(placeName)}`;
+    const googleUrl = `comgooglemaps://?q=${encodeURIComponent(placeName)}`;
     
     try {
       window.location.href = appleUrl;
@@ -89,13 +91,13 @@ export const openGoogleMaps = (coordinates: { lat: number; lng: number }, placeN
         window.location.href = googleUrl;
       }, 500);
     } catch (error) {
-      // Fallback to web Google Maps
-      window.open(`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`, '_blank');
+      // Fallback to web Google Maps with location name
+      window.open(`https://www.google.com/maps/search/${encodeURIComponent(placeName)}`, '_blank');
     }
   } else if (platform.isAndroid) {
-    // For Android browsers (not our app), try various intents
-    const googleUrl = `google.navigation:q=${coordinates.lat},${coordinates.lng}`;
-    const geoUrl = `geo:${coordinates.lat},${coordinates.lng}?q=${coordinates.lat},${coordinates.lng}`;
+    // For Android browsers (not our app), try various intents with location name
+    const googleUrl = `google.navigation:q=${encodeURIComponent(placeName)}`;
+    const geoUrl = `geo:0,0?q=${encodeURIComponent(placeName)}`;
     
     try {
       window.location.href = googleUrl;
@@ -103,11 +105,11 @@ export const openGoogleMaps = (coordinates: { lat: number; lng: number }, placeN
       try {
         window.location.href = geoUrl;
       } catch (error2) {
-        window.open(`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`, '_blank');
+        window.open(`https://www.google.com/maps/search/${encodeURIComponent(placeName)}`, '_blank');
       }
     }
   } else {
-    // Desktop or other platforms - open in web browser
-    window.open(`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`, '_blank');
+    // Desktop or other platforms - open in web browser with location name
+    window.open(`https://www.google.com/maps/search/${encodeURIComponent(placeName)}`, '_blank');
   }
 };
