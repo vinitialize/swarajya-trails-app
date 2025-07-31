@@ -68,6 +68,67 @@
       .animate-word-cycle {
         animation: wordCycle 2.5s infinite ease-in-out;
       }
+      @keyframes rocket-launch {
+        0% {
+          transform: translateY(0) rotate(0deg) scale(1);
+          opacity: 1;
+        }
+        25% {
+          transform: translateY(-40px) rotate(-15deg) scale(1.2);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateY(-80px) rotate(-30deg) scale(0.8);
+          opacity: 0.3;
+        }
+        75% {
+          transform: translateY(40px) rotate(15deg) scale(0.8);
+          opacity: 0.3;
+        }
+        100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes twinkle {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        25% {
+          opacity: 0.7;
+          transform: scale(1.1);
+        }
+        50% {
+          opacity: 0.3;
+          transform: scale(1.2);
+        }
+        75% {
+          opacity: 0.8;
+          transform: scale(1.05);
+        }
+      }
+      @keyframes wave-flag {
+        0%, 100% {
+          transform: rotate(0deg) scaleX(1);
+        }
+        25% {
+          transform: rotate(2deg) scaleX(1.02);
+        }
+        50% {
+          transform: rotate(-1deg) scaleX(0.98);
+        }
+        75% {
+          transform: rotate(3deg) scaleX(1.03);
+        }
+      }
+      /* PNG Icon theme transitions */
+      .logo-icon {
+        transition: filter 0.3s ease-in-out;
+      }
+      .dark .logo-icon {
+        filter: invert(1) brightness(0.9) sepia(1) hue-rotate(180deg) saturate(1.2);
+      }
     </style>
     <script>
       // Prevents flash of incorrect theme by applying theme class before React loads

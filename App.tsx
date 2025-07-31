@@ -1,22 +1,16 @@
-
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { ItineraryDisplay } from './components/ItineraryDisplay';
+import AppDescription from './components/AppDescription';
 import SmartItineraryInput from './components/SmartItineraryInput';
 import FeatureGuard, { useFeatureFlags } from './components/FeatureGuard';
 import DebugPanel from './components/DebugPanel';
 import AdminPanel from './components/AdminPanel';
 import { VersionDisplay } from './components/VersionDisplay';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { generateItinerary, ItineraryFilters, getInspiration, ItineraryResult } from './services/geminiService';
-import { LightbulbIcon, LocationPinIcon, SparklesIcon } from './components/icons';
 
-const getInitialTheme = (): 'light' | 'dark' => {
-  if (typeof window !== 'undefined') {
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-  }
-  return 'light';
-};
 
 const App: React.FC = () => {
   const [forts, setForts] = useState<string>('');
@@ -26,8 +20,8 @@ const App: React.FC = () => {
   const [isInspiring, setIsInspiring] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showItinerary, setShowItinerary] = useState<boolean>(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
+  const [scrollY, setScrollY] = useState<number>(0);
   
   // Get feature flags to check maintenance mode
   const { featureFlags } = useFeatureFlags();
@@ -47,19 +41,6 @@ const App: React.FC = () => {
 
   const isGenerateDisabled = useMemo(() => isLoading || isInspiring || !forts.trim(), [isLoading, isInspiring, forts]);
 
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const handleThemeToggle = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
 
   const handleGenerateItinerary = useCallback(async () => {
     if (isGenerateDisabled) return;
@@ -136,6 +117,16 @@ const App: React.FC = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  // Track scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     if (showItinerary) {
       const timer = setTimeout(() => {
@@ -146,45 +137,72 @@ const App: React.FC = () => {
   }, [showItinerary]);
   
   return (
-    <>
+    <ThemeProvider>
       <FeatureGuard>
-        <div className="min-h-screen flex flex-col">
-          <Header theme={theme} onThemeToggle={handleThemeToggle} />
-          <main className="container mx-auto px-4 py-8 flex-grow w-full">
-            <div className="max-w-3xl mx-auto flex flex-col gap-8">
-              
-              {/* Fort Suggestions - Controlled by feature flag */}
-              <FeatureGuard feature="fortSuggestionsEnabled">
-                <SmartItineraryInput
-                  filters={filters}
-                  onFiltersChange={(newFilters) => {
-                    setForts(newFilters.fortsList);
+        <div className="min-h-screen">
+          <Header />
+          
+          {/* Main content with top padding to account for sticky header */}
+          <main 
+            className="pt-24 pb-8 transition-opacity duration-800 ease-in-out"
+          >
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto flex flex-col gap-8">
+                
+                {/* App Description */}
+                <div 
+                  className="relative transition-all duration-300 ease-out"
+                  style={{
+                    opacity: scrollY > 200 ? 0.3 : 1,
+                    transform: `translateY(${scrollY > 200 ? -10 : 0}px) scale(${scrollY > 200 ? 0.95 : 1})`
                   }}
-                  onGenerateItinerary={handleGenerateItinerary}
-                  isLoading={isLoading}
-                />
-              </FeatureGuard>
-
-              {error && (
-                <div className="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative animate-fade-in-up" role="alert">
-                  <strong className="font-bold">Oops! </strong>
-                  <span className="block sm:inline">{error}</span>
+                >
+                  <AppDescription />
                 </div>
-              )}
-
-              {/* Itinerary Generation - Controlled by feature flag */}
-              {showItinerary && (
-                <FeatureGuard feature="itineraryGenerationEnabled">
-                  <div id="itinerary-section" className="animate-fade-in-up" style={{ animationDelay: '150ms', opacity: 0 }}>
-                    <ItineraryDisplay 
-                      content={itinerary?.itineraryText ?? null} 
+                
+                {/* Fort Suggestions - Controlled by feature flag */}
+                <FeatureGuard feature="fortSuggestionsEnabled">
+                  <div
+                    className="relative transition-transform duration-600 ease-in-out"
+                  >
+                    <SmartItineraryInput
+                      filters={filters}
+                      onFiltersChange={(newFilters) => {
+                        setForts(newFilters.fortsList);
+                      }}
+                      onGenerateItinerary={handleGenerateItinerary}
                       isLoading={isLoading}
-                      userLocation={userLocation}
-                      fortCoordinates={itinerary?.coordinates ?? null}
-                     />
+                    />
                   </div>
                 </FeatureGuard>
-              )}
+
+                {error && (
+                  <div 
+                    className="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative transition-all duration-400 ease-in-out" 
+                    role="alert"
+                  >
+                    <strong className="font-bold">Oops! </strong>
+                    <span className="block sm:inline">{error}</span>
+                  </div>
+                )}
+
+                {/* Itinerary Generation - Controlled by feature flag */}
+                {showItinerary && (
+                  <FeatureGuard feature="itineraryGenerationEnabled">
+                    <div 
+                      id="itinerary-section"
+                      className="transition-transform duration-600 ease-in-out"
+                    >
+                      <ItineraryDisplay 
+                        content={itinerary?.itineraryText ?? null} 
+                        isLoading={isLoading}
+                        userLocation={userLocation}
+                        fortCoordinates={itinerary?.coordinates ?? null}
+                       />
+                    </div>
+                  </FeatureGuard>
+                )}
+              </div>
             </div>
           </main>
         </div>
@@ -198,7 +216,7 @@ const App: React.FC = () => {
       
       {/* Admin Panel - Only shown during maintenance mode */}
       {featureFlags?.maintenanceMode && <AdminPanel />}
-    </>
+    </ThemeProvider>
   );
 };
 

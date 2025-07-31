@@ -1,47 +1,33 @@
-
 import React from 'react';
-import { SunIcon, MoonIcon } from './icons';
+import ThemeToggle from './ThemeToggle';
 
-interface HeaderProps {
-  theme: 'light' | 'dark';
-  onThemeToggle: () => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ theme, onThemeToggle }) => {
+export const Header: React.FC = () => {
   return (
-    <header className="py-4 sm:py-6">
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center justify-center gap-3">
-          {theme === 'dark' ? (
-            <img src="/icon.png" alt="Swarajya Trails Logo" className="h-8 w-8 rounded filter invert brightness-0 contrast-100" />
-          ) : (
-            <img src="/icon.png" alt="Swarajya Trails Logo" className="h-8 w-8 rounded" />
-          )}
-          <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Swarajya Trails
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
-              Discover Maharashtra's Historic Forts
-            </p>
+    <header 
+      className="fixed top-0 left-0 right-0 z-50 bg-white/30 dark:bg-slate-900/30 backdrop-blur-2xl shadow-lg border-b border-slate-200/10 dark:border-slate-700/10 transition-all duration-300"
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex-shrink-0">
+              <img 
+                src="/icon.png" 
+                alt="Swarajya Trails Logo" 
+                className="logo-icon h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 object-contain drop-shadow-md"
+              />
+            </div>
+            
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                <span className="hidden sm:inline">Swarajya Trails</span>
+                <span className="sm:hidden">Swarajya</span>
+              </h1>
+            </div>
           </div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
         </div>
-        <button
-          onClick={onThemeToggle}
-          className="relative inline-flex items-center h-8 w-14 p-1 rounded-full bg-slate-200 dark:bg-slate-800 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          aria-label="Toggle theme"
-        >
-          <span
-            className={`absolute top-1 left-1 flex items-center justify-center h-6 w-6 rounded-full bg-white dark:bg-slate-700 shadow-md transform transition-transform duration-300 ease-in-out ${
-              theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
-            }`}
-          >
-             {theme === 'dark' 
-                ? <MoonIcon className="h-4 w-4 text-indigo-400"/> 
-                : <SunIcon className="h-4 w-4 text-amber-500"/>
-             }
-          </span>
-        </button>
       </div>
     </header>
   );

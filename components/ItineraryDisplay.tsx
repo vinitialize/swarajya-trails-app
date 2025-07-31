@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { CopyIcon, CheckIcon, LocationPinIcon, CalendarIcon, ThermometerIcon, WindIcon, WeatherIcon, WeatherSunnyIcon, WeatherPartlyCloudyIcon, WeatherCloudyIcon, WeatherRainIcon, WeatherWindyIcon, PencilIcon, XIcon, InfoIcon, MapIcon } from './icons';
+import { Copy, Check, Calendar, Thermometer, Wind, CloudSun, Edit3, X, Info, Map, Sparkles } from 'lucide-react';
 import { WeatherResult, getWeatherForecast } from '../services/geminiService';
 import MiniMap from './MiniMap';
 import DOMPurify from 'dompurify';
@@ -232,6 +232,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
   const [editedContent, setEditedContent] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
   
+  
   // Extract fort name from content title
   const getFortName = useCallback((content: string | null): string => {
     if (!content) return 'Fort Location';
@@ -349,7 +350,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                     aria-label="Check weather forecast"
                     aria-expanded={showWeather}
                 >
-                  <WeatherIcon className="h-4 w-4" />
+                  <CloudSun className="h-4 w-4" />
                   Weather
                 </button>
                 <button
@@ -357,7 +358,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                     className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 bg-emerald-100 hover:bg-emerald-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-300"
                     aria-label="Show map location"
                 >
-                  <MapIcon className="h-4 w-4" />
+                  <Map className="h-4 w-4" />
                   View Route
                 </button>
               </>
@@ -370,14 +371,14 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                   className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-900/60 text-green-600 dark:text-green-300"
                   aria-label="Save changes"
                 >
-                  <CheckIcon className="h-4 w-4" /> Save
+                  <Check className="h-4 w-4" /> Save
                 </button>
                  <button
                   onClick={handleCancel}
                   className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
                   aria-label="Cancel editing"
                 >
-                  <XIcon className="h-4 w-4" /> Cancel
+                  <X className="h-4 w-4" /> Cancel
                 </button>
               </>
             ) : (
@@ -386,7 +387,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                 className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
                 aria-label="Edit itinerary"
               >
-                <PencilIcon className="h-4 w-4" /> Edit
+                <Edit3 className="h-4 w-4" /> Edit
               </button>
             )}
 
@@ -399,7 +400,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                   : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
-              {isCopied ? ( <> <CheckIcon className="h-4 w-4" /> Copied! </> ) : ( <> <CopyIcon className="h-4 w-4" /> Copy </> )}
+              {isCopied ? ( <> <Check className="h-4 w-4" /> Copied! </> ) : ( <> <Copy className="h-4 w-4" /> Copy </> )}
             </button>
           </div>
         )}
@@ -411,7 +412,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Weather Forecast</h3>
                 <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                  <Calendar className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                   <input
                     type="date"
                     value={selectedDate}
@@ -426,7 +427,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
               {/* Weather forecast info card */}
               <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <div className="flex items-start gap-2">
-                  <InfoIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <Info className="h-4 w-4 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Plan Your Trek</p>
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
@@ -452,11 +453,11 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
                       <p className="mt-4 text-slate-700 dark:text-slate-300">{weather.summary}</p>
                       <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 flex flex-wrap gap-x-6 gap-y-2 text-sm">
                           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                                <ThermometerIcon className="h-5 w-5 text-red-500" />
+                                <Thermometer className="h-5 w-5 text-red-500" />
                                 <span>{weather.temperatureMinC}°C / <strong className="font-semibold text-slate-800 dark:text-slate-100">{weather.temperatureMaxC}°C</strong></span>
                           </div>
                           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                                <WindIcon className="h-5 w-5 text-sky-500" />
+                                <Wind className="h-5 w-5 text-sky-500" />
                                 <span><strong className="font-semibold text-slate-800 dark:text-slate-100">{weather.windSpeedKmh}</strong> km/h Wind</span>
                           </div>
                       </div>
@@ -536,7 +537,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
         <>
           {/* AI Content Disclaimer */}
           <div className="mt-8 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 flex items-start gap-3">
-            <InfoIcon className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <Info className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-amber-800 dark:text-amber-300">AI-Generated Content</h4>
               <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">

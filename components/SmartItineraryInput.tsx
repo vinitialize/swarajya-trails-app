@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ItineraryFilters } from '../services/geminiService';
 
 interface SmartItineraryInputProps {
@@ -199,6 +199,7 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
     const [inputError, setInputError] = useState<string>('');
     const [expandedFort, setExpandedFort] = useState<string | null>(null);
     const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
+    const regionRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
 
     const getFilteredRegions = (): RegionalForts[] => {
         return REGIONAL_FORTS.map(region => ({
