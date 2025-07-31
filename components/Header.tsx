@@ -19,8 +19,8 @@ export const Header: React.FC = () => {
             
             <div className="min-w-0 flex-1">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
-                <span className="hidden sm:inline">Swarajya Trails</span>
-                <span className="sm:hidden">Swarajya</span>
+                <span className="hidden sm:inline">SwarajyaTrails</span>
+                <span className="sm:hidden">SwarajyaTrails</span>
               </h1>
             </div>
           </div>

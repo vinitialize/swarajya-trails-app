@@ -4,7 +4,7 @@ import metadata from '../metadata.json';
 
 const AppDescription: React.FC = () => {
   return (
-    <div className="relative p-6 sm:p-8 rounded-3xl shadow-lg bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900 text-slate-800 dark:text-slate-300 overflow-hidden border border-blue-100/50 dark:border-slate-700/50">
+    <div className="relative p-6 sm:p-8 rounded-3xl shadow-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900 text-slate-800 dark:text-slate-300 overflow-hidden border border-blue-100/50 dark:border-slate-700/50 backdrop-blur-sm">
       {/* Subtle background pattern */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-200/20 to-transparent dark:from-indigo-600/10 rounded-full -translate-y-16 translate-x-16"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-200/20 to-transparent dark:from-purple-600/10 rounded-full translate-y-12 -translate-x-12"></div>

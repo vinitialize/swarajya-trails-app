@@ -149,32 +149,39 @@ const App: React.FC = () => {
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto flex flex-col gap-8">
                 
-                {/* App Description */}
-                <div 
-                  className="relative transition-all duration-300 ease-out"
-                  style={{
-                    opacity: scrollY > 200 ? 0.3 : 1,
-                    transform: `translateY(${scrollY > 200 ? -10 : 0}px) scale(${scrollY > 200 ? 0.95 : 1})`
-                  }}
-                >
-                  <AppDescription />
-                </div>
-                
-                {/* Fort Suggestions - Controlled by feature flag */}
-                <FeatureGuard feature="fortSuggestionsEnabled">
-                  <div
-                    className="relative transition-transform duration-600 ease-in-out"
+                {/* Stacked Cards Container */}
+                <div className="relative">
+                  {/* App Description - Background Card (stays in place) */}
+                  <div 
+                    className="relative transition-all duration-300 ease-out"
+                    style={{
+                      zIndex: 1
+                    }}
                   >
-                    <SmartItineraryInput
-                      filters={filters}
-                      onFiltersChange={(newFilters) => {
-                        setForts(newFilters.fortsList);
-                      }}
-                      onGenerateItinerary={handleGenerateItinerary}
-                      isLoading={isLoading}
-                    />
+                    <AppDescription />
                   </div>
-                </FeatureGuard>
+                  
+                  {/* Fort Suggestions - Starts lower and slides up to cover AppDescription */}
+                  <FeatureGuard feature="fortSuggestionsEnabled">
+                    <div
+                      className="relative transition-all duration-300 ease-out shadow-2xl"
+                      style={{
+                        marginTop: '40px', // Initial position below AppDescription
+                        transform: `translateY(${Math.max(-scrollY * 0.8, -200)}px)`, // Slides up as user scrolls
+                        zIndex: 10
+                      }}
+                    >
+                      <SmartItineraryInput
+                        filters={filters}
+                        onFiltersChange={(newFilters) => {
+                          setForts(newFilters.fortsList);
+                        }}
+                        onGenerateItinerary={handleGenerateItinerary}
+                        isLoading={isLoading}
+                      />
+                    </div>
+                  </FeatureGuard>
+                </div>
 
                 {error && (
                   <div 
