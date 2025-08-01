@@ -16,6 +16,7 @@
     "@google-cloud/secret-manager": "^6.1.0",
     "@google/generative-ai": "^0.21.0",
     "@googlemaps/js-api-loader": "^1.16.10",
+    "@radix-ui/react-accordion": "^1.2.11",
     "@types/dompurify": "^3.0.5",
     "animejs": "^4.1.2",
     "dompurify": "^3.2.6",

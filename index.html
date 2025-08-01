@@ -68,6 +68,33 @@
       .animate-word-cycle {
         animation: wordCycle 2.5s infinite ease-in-out;
       }
+      
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+      
+      @keyframes shake {
+        0%, 100% {
+          transform: translateX(0);
+        }
+        10%, 30%, 50%, 70%, 90% {
+          transform: translateX(-2px);
+        }
+        20%, 40%, 60%, 80% {
+          transform: translateX(2px);
+        }
+      }
+      .animate-shake {
+        animation: shake 0.5s ease-in-out;
+      }
       @keyframes rocket-launch {
         0% {
           transform: translateY(0) rotate(0deg) scale(1);
@@ -128,6 +155,37 @@
       }
       .dark .logo-icon {
         filter: invert(1) brightness(0.9) sepia(1) hue-rotate(180deg) saturate(1.2);
+      }
+      
+      /* Accordion animations */
+      @keyframes accordion-down {
+        from {
+          height: 0;
+          opacity: 0;
+        }
+        to {
+          height: var(--radix-accordion-content-height);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes accordion-up {
+        from {
+          height: var(--radix-accordion-content-height);
+          opacity: 1;
+        }
+        to {
+          height: 0;
+          opacity: 0;
+        }
+      }
+      
+      .animate-accordion-down {
+        animation: accordion-down 0.3s ease-out;
+      }
+      
+      .animate-accordion-up {
+        animation: accordion-up 0.3s ease-out;
       }
     </style>
     <script>

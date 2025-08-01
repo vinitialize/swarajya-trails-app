@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import * as Accordion from '@radix-ui/react-accordion';
 import { ItineraryFilters } from '../services/geminiService';
 
 interface SmartItineraryInputProps {
@@ -118,6 +119,36 @@ const REGIONAL_FORTS: RegionalForts[] = [
                 description: 'The highest peak in Thane district. Rock climbing and rappelling opportunities with dense forest cover.',
                 keyFeatures: ['Highest in Thane', 'Rock climbing', 'Dense forests'],
                 trekDuration: '4-5 hours'
+            },
+            { 
+                name: 'Karnala', 
+                region: 'Raigad', 
+                difficulty: 'Easy', 
+                category: 'Bird Sanctuary Trek',
+                elevation: '1,440 ft',
+                description: 'A short trek known for its fort and bird sanctuary, offering stunning views.',
+                keyFeatures: ['Bird sanctuary', 'Fort views', 'Nature trails'],
+                trekDuration: '1-2 hours'
+            },
+            { 
+                name: 'Sudhagad', 
+                region: 'Raigad', 
+                difficulty: 'Moderate', 
+                category: 'Historic Fort',
+                elevation: '3,550 ft',
+                description: 'A historic fort with a large plateau and fantastic views of the Sahyadri ranges.',
+                keyFeatures: ['Historical walls', 'Temple', 'Panoramic views'],
+                trekDuration: '3-4 hours'
+            },
+            { 
+                name: 'Korigad', 
+                region: 'Raigad', 
+                difficulty: 'Easy', 
+                category: 'Scenic Hill Fort',
+                elevation: '3,049 ft',
+                description: 'A scenic fort with a large plateau and amazing views, especially in monsoon.',
+                keyFeatures: ['Lush greenery', 'Large plateau', 'Scenic views'],
+                trekDuration: '2-3 hours'
             }
         ]
     },
@@ -145,6 +176,46 @@ const REGIONAL_FORTS: RegionalForts[] = [
                 description: 'Located in Koyna Wildlife Sanctuary. Accessible by boat ride across Shivsagar lake followed by jungle trek.',
                 keyFeatures: ['Wildlife sanctuary', 'Boat ride', 'Jungle trek'],
                 trekDuration: '6-8 hours'
+            },
+            { 
+                name: 'Sajjangad', 
+                region: 'Satara', 
+                difficulty: 'Easy', 
+                category: 'Spiritual Fortress',
+                elevation: '3,380 ft',
+                description: 'Known as a spiritual site with a fort and temple dedicated to Saint Ramdas.',
+                keyFeatures: ['Spiritual site', 'Temple', 'Panoramic views'],
+                trekDuration: '2-3 hours'
+            },
+            { 
+                name: 'Ajinkyatara', 
+                region: 'Satara', 
+                difficulty: 'Moderate', 
+                category: 'Strategic Hill Fort',
+                elevation: '3,300 ft',
+                description: 'Famous for its strategic significance and stunning views of Satara city.',
+                keyFeatures: ['Strategic significance', 'Scenic views', 'Historical site'],
+                trekDuration: '3-4 hours'
+            },
+            { 
+                name: 'Pandavgad', 
+                region: 'Satara', 
+                difficulty: 'Moderate', 
+                category: 'Historical Trek',
+                elevation: '4,177 ft',
+                description: 'A trek that combines history and adventure with ancient structures.',
+                keyFeatures: ['Historical trek', 'Scenic routes', 'Ancient structures'],
+                trekDuration: '4-5 hours'
+            },
+            { 
+                name: 'Koraigad', 
+                region: 'Satara', 
+                difficulty: 'Easy', 
+                category: 'Scenic Valley Fort',
+                elevation: '2,100 ft',
+                description: 'A beautiful fort surrounded by lush valleys and scenic landscapes.',
+                keyFeatures: ['Valley views', 'Scenic landscapes', 'Easy access'],
+                trekDuration: '2-3 hours'
             }
         ]
     },
@@ -182,6 +253,46 @@ const REGIONAL_FORTS: RegionalForts[] = [
                 description: 'Known as the "Jewel of Sahyadris" for its natural beauty. Features ancient caves and a needle-like pinnacle.',
                 keyFeatures: ['Natural beauty', 'Ancient caves', 'Needle pinnacle'],
                 trekDuration: '4-5 hours'
+            },
+            { 
+                name: 'Alang', 
+                region: 'Ahmednagar', 
+                difficulty: 'Difficult', 
+                category: 'Tough Hill Fort',
+                elevation: '4,850 ft',
+                description: 'One of the toughest treks with steep climbs, perfect for thrill-seekers.',
+                keyFeatures: ['Challenging terrain', 'Steep climbs', 'Thrilling experience'],
+                trekDuration: '5-7 hours'
+            },
+            { 
+                name: 'Kulanggad', 
+                region: 'Ahmednagar', 
+                difficulty: 'Moderate', 
+                category: 'Fort with a View',
+                elevation: '4,750 ft',
+                description: 'Offers breathtaking views and a good challenge for trekkers.',
+                keyFeatures: ['Breathtaking views', 'Challenging paths', 'Rich history'],
+                trekDuration: '4-5 hours'
+            },
+            { 
+                name: 'Ajoba', 
+                region: 'Ahmednagar', 
+                difficulty: 'Difficult', 
+                category: 'Sacred Hill',
+                elevation: '4,500 ft',
+                description: 'A trek with steep ascents and spiritual significance.',
+                keyFeatures: ['Spiritual journey', 'Steep ascents', 'Sacred caves'],
+                trekDuration: '5-6 hours'
+            },
+            { 
+                name: 'Bhandardara', 
+                region: 'Ahmednagar', 
+                difficulty: 'Easy', 
+                category: 'Lake Side Trek',
+                elevation: '2,500 ft',
+                description: 'A beautiful lake-side trek with scenic waterfalls and pleasant weather.',
+                keyFeatures: ['Lake views', 'Waterfalls', 'Scenic beauty'],
+                trekDuration: '2-3 hours'
             }
         ]
     }
@@ -313,76 +424,113 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                 Choose Your Adventure
             </h3>
             
-            {/* Mode Toggle */}
-            <div className="flex mb-6 bg-gray-50 dark:bg-slate-800 rounded-xl p-1 border border-gray-200 dark:border-slate-700">
-                <button
-                    onClick={() => handleModeSwitch('suggestions')}
-                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        inputMode === 'suggestions'
-                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 shadow-sm text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500'
-                            : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-slate-700/50 dark:hover:to-slate-600/50'
-                    }`}
-                >
-                    🏰 Explore Forts
-                </button>
-                <button
-                    onClick={() => handleModeSwitch('custom')}
-                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        inputMode === 'custom'
-                            ? 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-700 dark:to-slate-600 shadow-sm text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500'
-                            : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-slate-700/50 dark:hover:to-slate-600/50'
-                    }`}
-                >
-🥾 Plan a Trek
-                </button>
+            {/* Adventure Mode Selector */}
+            <div className="relative mb-8">
+                <div className="flex bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-800 rounded-2xl p-2 border border-gray-200/50 dark:border-slate-700/50 shadow-inner">
+                    <button
+                        onClick={() => handleModeSwitch('suggestions')}
+                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-300 group overflow-hidden ${
+                            inputMode === 'suggestions'
+                                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-lg shadow-blue-100/50 dark:shadow-slate-900/20 border border-blue-100 dark:border-slate-600 transform scale-[1.02]'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/30'
+                        }`}
+                    >
+                        <div className="flex items-center justify-center gap-3">
+                            <span className={`text-xl transition-transform duration-300 ${
+                                inputMode === 'suggestions' ? 'scale-110' : 'group-hover:scale-105'
+                            }`}>🏰</span>
+                            <span className="font-semibold tracking-wide">Explore Forts</span>
+                        </div>
+                        {inputMode === 'suggestions' && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl"></div>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => handleModeSwitch('custom')}
+                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-300 group overflow-hidden ${
+                            inputMode === 'custom'
+                                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-lg shadow-emerald-100/50 dark:shadow-slate-900/20 border border-emerald-100 dark:border-slate-600 transform scale-[1.02]'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/30'
+                        }`}
+                    >
+                        <div className="flex items-center justify-center gap-3">
+                            <span className={`text-xl transition-transform duration-300 ${
+                                inputMode === 'custom' ? 'scale-110' : 'group-hover:scale-105'
+                            }`}>🥾</span>
+                            <span className="font-semibold tracking-wide">Plan a Trek</span>
+                        </div>
+                        {inputMode === 'custom' && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl"></div>
+                        )}
+                    </button>
+                </div>
+                
+                {/* Tab Description */}
+                <div className="mt-4 text-center">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                        {inputMode === 'suggestions' 
+                            ? '🌟 Explore curated fort destinations across Maharashtra with detailed insights'
+                            : '✍️ Describe your perfect trekking adventure and let us craft your journey'
+                        }
+                    </p>
+                </div>
             </div>
 
             {inputMode === 'suggestions' ? (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-fade-in-up" style={{animationDuration: '400ms'}}>
                     <h4 className="text-base font-medium text-gray-900 dark:text-slate-100">
                         Popular Forts by Region
                     </h4>
                     
                     {filteredRegions.length === 0 ? (
-                        <p className="text-gray-500 dark:text-slate-400 text-sm italic">
+                        <p className="text-gray-500 dark:text-slate-400 text-sm italic animate-fade-in" style={{animationDuration: '300ms'}}>
                             No forts match your current filters. Try adjusting your preferences above.
                         </p>
                     ) : (
-                        <div className="space-y-4">
-                            {filteredRegions.map((region) => (
-                                <div key={region.region} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <Accordion.Root
+                            type="single"
+                            collapsible
+                            className="space-y-4"
+                        >
+                            {filteredRegions.map((region, regionIndex) => (
+                                <Accordion.Item 
+                                    key={region.region}
+                                    value={region.region}
+                                    className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in-up"
+                                    style={{animationDelay: `${regionIndex * 100}ms`, animationDuration: '500ms'}}
+                                >
                                     {/* Region Header */}
-                                    <button
-                                        onClick={() => toggleRegionExpansion(region.region)}
-                                        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200"
-                                    >
-                                        <div className="flex-1">
-                                            <h5 className="font-semibold text-gray-900 dark:text-slate-100 text-lg">{region.displayName}</h5>
-                                            <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">{region.description}</p>
-                                            <div className="text-xs text-gray-500 dark:text-slate-500 mt-2 flex items-center gap-1">
-                                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                                {region.forts.length} forts available
+                                    <Accordion.Header className="w-full">
+                                        <Accordion.Trigger className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-all duration-200 group [&[data-state=open]>div>svg]:rotate-180">
+                                            <div className="flex-1">
+                                                <h5 className="font-semibold text-gray-900 dark:text-slate-100 text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">{region.displayName}</h5>
+                                                <p className="text-sm text-gray-600 dark:text-slate-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-slate-300 transition-colors duration-200">{region.description}</p>
+                                                <div className="text-xs text-gray-500 dark:text-slate-500 mt-2 flex items-center gap-1">
+                                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                                    {region.forts.length} {region.forts.length === 1 ? 'fort' : 'forts'} to explore
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="text-gray-400 dark:text-slate-500 ml-4">
-                                            <svg className={`w-5 h-5 transition-transform duration-200 ${expandedRegion === region.region ? 'rotate-90' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    </button>
+                                            <div className="text-gray-400 dark:text-slate-500 ml-4">
+                                                <svg className="w-5 h-5 transition-transform duration-300 ease-in-out group-hover:text-gray-600 dark:group-hover:text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        </Accordion.Trigger>
+                                    </Accordion.Header>
                                     
-                                    {/* Region Forts */}
-                                    {expandedRegion === region.region && (
-                                        <div className="border-t border-gray-200 dark:border-slate-700">
-                                            <div className="p-4 space-y-3">
-                                                {region.forts.map((fort) => (
-                                                    <div key={fort.name} className={`bg-white dark:bg-slate-800 border rounded-lg overflow-hidden transition-all duration-200 cursor-pointer ${
+                                    {/* Region Forts - Animated Accordion Content */}
+                                    <Accordion.Content className="border-t border-gray-200 dark:border-slate-700 overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+                                        <div className="p-4 space-y-3">
+                                            {region.forts.map((fort, fortIndex) => (
+                                                <div
+                                                    key={fort.name}
+                                                    className={`bg-white dark:bg-slate-800 border rounded-lg overflow-hidden transition-all duration-200 cursor-pointer ${
                                                         filters.fortsList === fort.name 
                                                             ? 'border-blue-500 dark:border-blue-400 shadow-lg ring-2 ring-blue-200 dark:ring-blue-800' 
-                                                            : 'border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md'
+                                                            : 'border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg'
                                                     }`}
-                                                        onClick={() => handleFortSuggestionClick(fort.name)}
-                                                    >
+                                                    onClick={() => handleFortSuggestionClick(fort.name)}
+                                                >
                                                         <div className="p-4">
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex-1">
@@ -428,17 +576,17 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                                                                     className="w-full px-6 py-3 text-base font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                                                                 >
                                                                     {isLoading ? (
-                                                                        <>
+                                                                        <React.Fragment>
                                                                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                                             </svg>
                                                                             Creating Your Adventure...
-                                                                        </>
+                                                                        </React.Fragment>
                                                                     ) : (
-                                                                        <>
+                                                                        <React.Fragment>
                                                                             🚀 Create Itinerary
-                                                                        </>
+                                                                        </React.Fragment>
                                                                     )}
                                                                 </button>
                                                             </div>
@@ -501,33 +649,40 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                                                     </div>
                                                 ))}
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
+                                        </Accordion.Content>
+                                    </Accordion.Item>
                             ))}
-                        </div>
+                        </Accordion.Root>
                     )}
                     
                 </div>
             ) : (
-                <div>
+                <div className="animate-fade-in-up" style={{animationDuration: '400ms'}}>
                     <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Describe Your Trek</h4>
                     <textarea
                         value={customInput}
                         onChange={(e) => handleCustomInputChange(e.target.value)}
                         placeholder="Example: I want to visit Raigad and Torna forts over a weekend..."
-                        className={`w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 ${
-                            inputError ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
+                        className={`w-full p-3 border rounded-lg resize-none transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:scale-[1.02] bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 ${
+                            inputError 
+                                ? 'border-red-500 focus:ring-red-500 animate-shake' 
+                                : 'border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500'
                         }`}
                         rows={3}
                         maxLength={500}
                     />
                     <div className="flex justify-between items-center mt-2">
-                        <div className="text-xs text-gray-500 dark:text-slate-400">
+                        <div className={`text-xs transition-colors duration-200 ${
+                            customInput.length > 450 
+                                ? 'text-yellow-600 dark:text-yellow-400' 
+                                : customInput.length > 480 
+                                    ? 'text-red-600 dark:text-red-400' 
+                                    : 'text-gray-500 dark:text-slate-400'
+                        }`}>
                             {customInput.length}/500 characters
                         </div>
                         {inputError && (
-                            <div className="text-xs text-red-500">{inputError}</div>
+                            <div className="text-xs text-red-500 animate-fade-in" style={{animationDuration: '200ms'}}>{inputError}</div>
                         )}
                     </div>
                 </div>
@@ -538,9 +693,22 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                 <button
                     onClick={onGenerateItinerary}
                     disabled={isLoading}
-                    className="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 disabled:opacity-50"
+                    className="mt-4 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 animate-fade-in-up flex items-center justify-center gap-2 font-semibold"
+                    style={{animationDelay: '200ms', animationDuration: '300ms'}}
                 >
-                    {isLoading ? 'Creating...' : '🚀 Create Itinerary'}
+                    {isLoading ? (
+                        <React.Fragment>
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Creating Your Adventure...
+                        </React.Fragment>
+                    ) : (
+                        <React.Fragment>
+                            🚀 Create Itinerary
+                        </React.Fragment>
+                    )}
                 </button>
             )}
 

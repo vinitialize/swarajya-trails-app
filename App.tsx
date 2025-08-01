@@ -45,10 +45,20 @@ const App: React.FC = () => {
   const handleGenerateItinerary = useCallback(async () => {
     if (isGenerateDisabled) return;
 
+    // Always ensure itinerary section is visible when generating
+    setShowItinerary(true);
+    
+    // Scroll to itinerary section immediately when button is clicked
+    setTimeout(() => {
+      document.getElementById('itinerary-section')?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100); // Short delay to ensure DOM is updated with showItinerary=true
+
     setIsLoading(true);
     setError(null);
     setItinerary(null);
-    setShowItinerary(true);
 
     try {
       const result = await generateItinerary(filters);
@@ -127,14 +137,6 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (showItinerary) {
-      const timer = setTimeout(() => {
-        document.getElementById('itinerary-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [showItinerary]);
   
   return (
     <ThemeProvider>
@@ -147,7 +149,7 @@ const App: React.FC = () => {
             className="pt-24 pb-8 transition-opacity duration-800 ease-in-out"
           >
             <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto flex flex-col gap-8">
+              <div className="max-w-4xl mx-auto flex flex-col">
                 
                 {/* Stacked Cards Container */}
                 <div className="relative">
@@ -166,8 +168,8 @@ const App: React.FC = () => {
                     <div
                       className="relative transition-all duration-300 ease-out shadow-2xl"
                       style={{
-                        marginTop: '40px', // Initial position below AppDescription
-                        transform: `translateY(${Math.max(-scrollY * 0.8, -200)}px)`, // Slides up as user scrolls
+                        marginTop: '-20px', // Reduced gap for better stacking
+                        transform: `translateY(${Math.max(-scrollY * 0.5, -120)}px)`, // More subtle animation
                         zIndex: 10
                       }}
                     >
@@ -185,7 +187,7 @@ const App: React.FC = () => {
 
                 {error && (
                   <div 
-                    className="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative transition-all duration-400 ease-in-out" 
+                    className="bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl relative transition-all duration-400 ease-in-out mt-4" 
                     role="alert"
                   >
                     <strong className="font-bold">Oops! </strong>
@@ -198,7 +200,12 @@ const App: React.FC = () => {
                   <FeatureGuard feature="itineraryGenerationEnabled">
                     <div 
                       id="itinerary-section"
-                      className="transition-transform duration-600 ease-in-out"
+                      className="relative transition-all duration-300 ease-out shadow-2xl"
+                      style={{
+                        marginTop: '40px', // Initial position below other components
+                        transform: `translateY(${Math.max(-scrollY * 0.6, -160)}px)`, // Slides up as user scrolls
+                        zIndex: 20
+                      }}
                     >
                       <ItineraryDisplay 
                         content={itinerary?.itineraryText ?? null} 

@@ -231,6 +231,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedContent, setEditedContent] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
+  const [showBorderAnimation, setShowBorderAnimation] = useState<boolean>(false);
   
   
   // Extract fort name from content title
@@ -254,6 +255,13 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
       setShowWeather(false);
       setWeather(null);
       setWeatherError(null);
+      // Trigger border animation when new content arrives
+      setShowBorderAnimation(true);
+      // Remove animation class after animation completes
+      const timer = setTimeout(() => {
+        setShowBorderAnimation(false);
+      }, 1890); // Match the CSS animation duration of 1.89s
+      return () => clearTimeout(timer);
     }
   }, [content]);
   
@@ -331,7 +339,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ content, isL
   const maxDateString = maxDate.toISOString().split('T')[0];
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 p-6 md:p-8">
+    <div className={`w-full bg-white dark:bg-slate-900 rounded-2xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 p-6 md:p-8 ${showBorderAnimation ? 'border-sweep animate' : ''}`}>
         <div className="flex justify-between items-start gap-4 mb-6">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
           {isLoading ? (

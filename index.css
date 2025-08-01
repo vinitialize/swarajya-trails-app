@@ -1,0 +1,50 @@
+/* Hide scrollbar for webkit browsers */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+  scroll-behavior: smooth;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Fade-in animation for carousel items */
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animation-fadein {
+  animation: fadein 0.7s ease-out forwards;
+}
+
+/* Glowing border animation */
+@keyframes border-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(59, 130, 246, 0.3),
+      0 0 40px rgba(99, 102, 241, 0.2),
+      0 0 60px rgba(139, 92, 246, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 60px rgba(59, 130, 246, 0.6),
+      0 0 80px rgba(99, 102, 241, 0.5),
+      0 0 100px rgba(139, 92, 246, 0.4);
+  }
+}
+.border-sweep {
+  position: relative;
+  overflow: visible;
+}
+
+.border-sweep.animate {
+  animation: border-glow 1.89s ease-in-out infinite;
+}
