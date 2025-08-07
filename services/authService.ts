@@ -113,7 +113,7 @@ class AuthService {
       switch (error.code) {
         case 'auth/unauthorized-domain':
           const currentDomain = window.location.hostname;
-          if (currentDomain === 'localhost' || currentDomain === '127.0.0.1') {
+          if (currentDomain === 'localhost' || currentDomain.startsWith('127.0.0.') || currentDomain.endsWith('.local')) {
             errorMessage = 'Development setup issue. Please check your Firebase configuration and ensure the Google provider is enabled.';
           } else {
             errorMessage = `Domain '${currentDomain}' is not authorized. Please add it to your Firebase authorized domains or test on localhost.`;
