@@ -9,6 +9,7 @@ import AdminPanel from './components/AdminPanel';
 import { VersionDisplay } from './components/VersionDisplay';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { generateItinerary, ItineraryFilters, getInspiration, ItineraryResult } from './services/geminiService';
 
 
@@ -140,7 +141,8 @@ const App: React.FC = () => {
   
   return (
     <ThemeProvider>
-      <FeatureGuard>
+      <AuthProvider>
+        <FeatureGuard>
         <div className="min-h-screen">
           <Header />
           
@@ -224,6 +226,7 @@ const App: React.FC = () => {
         {/* Debug Panel - only shows in development */}
         <DebugPanel />
       </FeatureGuard>
+      </AuthProvider>
       
       {/* Version Display - Only shown to authenticated admin users */}
       <VersionDisplay show={isAdminAuthenticated} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo, useCallback, useMemo } from 'react';
 import { Route, Castle, MapPin, Cloud, Sparkles, Map, Shield } from 'lucide-react';
 import metadata from '../metadata.json';
 
@@ -62,23 +62,96 @@ const features: FeatureItem[] = [
   }
 ];
 
-const AppDescription: React.FC = () => {
+const AppDescriptionComponent: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Detect if user is on mobile
+  const isMobile = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 || 'ontouchstart' in window;
+    }
+    return false;
+  }, []);
+
+  // Memoize the carousel rotation to prevent unnecessary re-renders
+  const rotateCarousel = useCallback(() => {
+    setCurrentIndex((prevIndex) => (prevIndex + 3) % features.length);
+  }, []);
+
+  // Handle scroll detection for mobile
+  useEffect(() => {
+    if (isMobile) {
+      const handleScroll = () => {
+        setIsScrolling(true);
+        
+        // Clear existing timeout
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        
+        // Set scrolling to false after scroll stops
+        scrollTimeoutRef.current = setTimeout(() => {
+          setIsScrolling(false);
+        }, 150); // 150ms after scroll stops
+      };
+      
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('touchmove', handleScroll, { passive: true });
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('touchmove', handleScroll);
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+      };
+    }
+  }, [isMobile]);
 
   useEffect(() => {
-    if (!isHovered) {
-      const interval = setInterval(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 3) % features.length);
-      }, 3650); // Rotate the icons every 3.65 seconds
+    // Don't run carousel if hovered or (on mobile and scrolling)
+    const shouldPauseCarousel = isHovered || (isMobile && isScrolling);
+    
+    if (!shouldPauseCarousel) {
+      // Use longer interval on mobile to reduce performance impact
+      const interval = isMobile ? 5000 : 3650;
+      intervalRef.current = setInterval(rotateCarousel, interval);
       
-      return () => clearInterval(interval);
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
-  }, [isHovered]);
+  }, [isHovered, isScrolling, isMobile, rotateCarousel]);
 
-  // Effect to handle hover
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  // Memoized hover handlers to prevent re-renders
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+  // Memoize current features to prevent recalculation
+  const currentFeatures = useMemo(() => {
+    return features.slice(currentIndex, currentIndex + 3);
+  }, [currentIndex]);
 
 
   return (
@@ -95,19 +168,25 @@ const AppDescription: React.FC = () => {
           </p>
         </div>
         
-        {/* Multi-Browse Feature Carousel */}
+        {/* Multi-Browse Feature Carousel - Optimized for mobile */}
         <div 
           className="relative flex overflow-hidden"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          style={{ willChange: 'auto' }} // Optimize for better mobile performance
         >
           {/* Scrollable Container */}
-          {features.slice(currentIndex, currentIndex + 3).map((feature, index) => {
+          {currentFeatures.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
               <div 
-                key={`${feature.title}-${index}`}
+                key={`${currentIndex}-${feature.title}-${index}`} // More stable key
                 className="flex-1 text-center p-4 transition-all duration-700 ease-in-out opacity-0 animation-fadein"
+                style={{ 
+                  willChange: 'opacity, transform',
+                  backfaceVisibility: 'hidden', // Improve mobile rendering
+                  transform: 'translateZ(0)' // Force hardware acceleration
+                }}
               >
                 <div className={`inline-flex p-3 ${feature.bgColor} rounded-xl mb-3 transition-all duration-500 hover:shadow-lg`}>
                   <IconComponent className={`h-5 w-5 ${feature.iconColor} transition-colors duration-500`} />
@@ -124,5 +203,8 @@ const AppDescription: React.FC = () => {
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+const AppDescription = memo(AppDescriptionComponent);
 
 export default AppDescription;

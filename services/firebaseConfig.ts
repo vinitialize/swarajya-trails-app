@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getRemoteConfig, fetchAndActivate, getValue } from "firebase/remote-config";
+// Auth will be initialized in authService.ts to avoid circular dependencies
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

@@ -1,7 +1,11 @@
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
+import UserProfile from './UserProfile';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Header: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <header 
       className="fixed top-0 left-0 right-0 z-50 bg-white/30 dark:bg-slate-900/30 backdrop-blur-2xl shadow-lg border-b border-slate-200/10 dark:border-slate-700/10 transition-all duration-300"
@@ -25,8 +29,14 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
+          {/* Right side controls */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* User Profile - only show if authenticated */}
+            {isAuthenticated && <UserProfile />}
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

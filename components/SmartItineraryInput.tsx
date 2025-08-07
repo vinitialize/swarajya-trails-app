@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
+import { Castle } from 'lucide-react';
 import { ItineraryFilters } from '../services/geminiService';
+import ProtectedComponent from './ProtectedComponent';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SmartItineraryInputProps {
     filters: ItineraryFilters;
@@ -426,48 +429,46 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
             
             {/* Adventure Mode Selector */}
             <div className="relative mb-8">
-                <div className="flex bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-800 rounded-2xl p-2 border border-gray-200/50 dark:border-slate-700/50 shadow-inner">
+                <div className="flex bg-gradient-to-r from-slate-100/80 to-gray-100/80 dark:from-slate-800/80 dark:to-slate-700/80 rounded-2xl p-1.5 border border-gray-200/60 dark:border-slate-600/60 shadow-inner backdrop-blur-sm">
                     <button
                         onClick={() => handleModeSwitch('suggestions')}
-                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-300 group overflow-hidden ${
+                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-200 ease-out group overflow-hidden ${
                             inputMode === 'suggestions'
-                                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-lg shadow-blue-100/50 dark:shadow-slate-900/20 border border-blue-100 dark:border-slate-600 transform scale-[1.02]'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/30'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 dark:shadow-blue-900/30 border border-blue-500/20 dark:border-blue-400/20'
+                                : 'text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/60 dark:hover:bg-slate-600/40'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-3">
-                            <span className={`text-xl transition-transform duration-300 ${
-                                inputMode === 'suggestions' ? 'scale-110' : 'group-hover:scale-105'
-                            }`}>🏰</span>
-                            <span className="font-semibold tracking-wide">Explore Forts</span>
+                            <span className="text-xl">🏰</span>
+                            <span className="font-bold tracking-wide">Explore Forts</span>
                         </div>
                         {inputMode === 'suggestions' && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-xl"></div>
                         )}
                     </button>
                     <button
                         onClick={() => handleModeSwitch('custom')}
-                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-300 group overflow-hidden ${
+                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-200 ease-out group overflow-hidden ${
                             inputMode === 'custom'
-                                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-lg shadow-emerald-100/50 dark:shadow-slate-900/20 border border-emerald-100 dark:border-slate-600 transform scale-[1.02]'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/30'
+                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 dark:shadow-emerald-900/30 border border-emerald-500/20 dark:border-emerald-400/20'
+                                : 'text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/60 dark:hover:bg-slate-600/40'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-3">
-                            <span className={`text-xl transition-transform duration-300 ${
+                            <span className={`text-xl transition-transform duration-200 ${
                                 inputMode === 'custom' ? 'scale-110' : 'group-hover:scale-105'
                             }`}>🥾</span>
-                            <span className="font-semibold tracking-wide">Plan a Trek</span>
+                            <span className="font-bold tracking-wide">Plan a Trek</span>
                         </div>
                         {inputMode === 'custom' && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-xl"></div>
                         )}
                     </button>
                 </div>
                 
                 {/* Tab Description */}
                 <div className="mt-4 text-center">
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">
                         {inputMode === 'suggestions' 
                             ? '🌟 Explore curated fort destinations across Maharashtra with detailed insights'
                             : '✍️ Describe your perfect trekking adventure and let us craft your journey'
@@ -478,9 +479,11 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
 
             {inputMode === 'suggestions' ? (
                 <div className="space-y-4 animate-fade-in-up" style={{animationDuration: '400ms'}}>
-                    <h4 className="text-base font-medium text-gray-900 dark:text-slate-100">
-                        Popular Forts by Region
-                    </h4>
+                    <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-slate-100">
+                            Popular Forts by Region
+                        </h4>
+                    </div>
                     
                     {filteredRegions.length === 0 ? (
                         <p className="text-gray-500 dark:text-slate-400 text-sm italic animate-fade-in" style={{animationDuration: '300ms'}}>
@@ -505,8 +508,8 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                                             <div className="flex-1">
                                                 <h5 className="font-semibold text-gray-900 dark:text-slate-100 text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">{region.displayName}</h5>
                                                 <p className="text-sm text-gray-600 dark:text-slate-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-slate-300 transition-colors duration-200">{region.description}</p>
-                                                <div className="text-xs text-gray-500 dark:text-slate-500 mt-2 flex items-center gap-1">
-                                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                <div className="text-xs text-gray-600 dark:text-slate-400 font-medium mt-2 flex items-center gap-1">
+                                                    <Castle className="w-3 h-3 text-blue-500 dark:text-blue-400" />
                                                     {region.forts.length} {region.forts.length === 1 ? 'fort' : 'forts'} to explore
                                                 </div>
                                             </div>
@@ -657,59 +660,66 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                     
                 </div>
             ) : (
-                <div className="animate-fade-in-up" style={{animationDuration: '400ms'}}>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Describe Your Trek</h4>
-                    <textarea
-                        value={customInput}
-                        onChange={(e) => handleCustomInputChange(e.target.value)}
-                        placeholder="Example: I want to visit Raigad and Torna forts over a weekend..."
-                        className={`w-full p-3 border rounded-lg resize-none transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:scale-[1.02] bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 ${
-                            inputError 
-                                ? 'border-red-500 focus:ring-red-500 animate-shake' 
-                                : 'border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500'
-                        }`}
-                        rows={3}
-                        maxLength={500}
-                    />
-                    <div className="flex justify-between items-center mt-2">
-                        <div className={`text-xs transition-colors duration-200 ${
-                            customInput.length > 450 
-                                ? 'text-yellow-600 dark:text-yellow-400' 
-                                : customInput.length > 480 
-                                    ? 'text-red-600 dark:text-red-400' 
-                                    : 'text-gray-500 dark:text-slate-400'
-                        }`}>
-                            {customInput.length}/500 characters
+                <ProtectedComponent
+                    className="animate-fade-in-up"
+                    requireAuth={true}
+                >
+                    <div style={{animationDuration: '400ms'}}>
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Describe Your Trek</h4>
+                        <textarea
+                            value={customInput}
+                            onChange={(e) => handleCustomInputChange(e.target.value)}
+                            placeholder="Example: I want to visit Raigad and Torna forts over a weekend..."
+                            className={`w-full p-3 border rounded-lg resize-none transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:scale-[1.02] bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 ${
+                                inputError 
+                                    ? 'border-red-500 focus:ring-red-500 animate-shake' 
+                                    : 'border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500'
+                            }`}
+                            rows={3}
+                            maxLength={500}
+                        />
+                        <div className="flex justify-between items-center mt-2">
+                            <div className={`text-xs transition-colors duration-200 ${
+                                customInput.length > 450 
+                                    ? 'text-yellow-600 dark:text-yellow-400' 
+                                    : customInput.length > 480 
+                                        ? 'text-red-600 dark:text-red-400' 
+                                        : 'text-gray-500 dark:text-slate-400'
+                            }`}>
+                                {customInput.length}/500 characters
+                            </div>
+                            {inputError && (
+                                <div className="text-xs text-red-500 animate-fade-in" style={{animationDuration: '200ms'}}>{inputError}</div>
+                            )}
                         </div>
-                        {inputError && (
-                            <div className="text-xs text-red-500 animate-fade-in" style={{animationDuration: '200ms'}}>{inputError}</div>
-                        )}
                     </div>
-                </div>
+                </ProtectedComponent>
             )}
 
 
             {inputMode === 'custom' && canGenerate && (
-                <button
-                    onClick={onGenerateItinerary}
-                    disabled={isLoading}
-                    className="mt-4 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 animate-fade-in-up flex items-center justify-center gap-2 font-semibold"
-                    style={{animationDelay: '200ms', animationDuration: '300ms'}}
-                >
-                    {isLoading ? (
-                        <React.Fragment>
-                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Creating Your Adventure...
-                        </React.Fragment>
-                    ) : (
-                        <React.Fragment>
-                            🚀 Create Itinerary
-                        </React.Fragment>
-                    )}
-                </button>
+                <ProtectedComponent requireAuth={true}>
+                    <button
+                        onClick={onGenerateItinerary}
+                        disabled={isLoading}
+                        className="mt-4 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 animate-fade-in-up flex items-center justify-center gap-2 font-semibold"
+                        style={{animationDelay: '200ms', animationDuration: '300ms'}}
+                    >
+                        {isLoading ? (
+                            <React.Fragment>
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Creating Your Adventure...
+                            </React.Fragment>
+                        ) : (
+                            <React.Fragment>
+                                🚀 Create Itinerary
+                            </React.Fragment>
+                        )}
+                    </button>
+                </ProtectedComponent>
             )}
 
         </div>
