@@ -32,7 +32,9 @@ try {
 // Detect environment
 const isDevelopment = window.location.hostname === 'localhost' || 
                      window.location.hostname === '127.0.0.1' || 
-                     window.location.hostname.includes('dev');
+                     window.location.hostname.includes('dev') ||
+                     window.location.port === '5173' ||
+                     window.location.port === '3000';
 
 // Configure Remote Config settings if available
 if (remoteConfig) {
