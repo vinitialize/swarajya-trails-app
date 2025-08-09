@@ -85,7 +85,7 @@ class SecretLoader {
       // Add other environment variables that don't come from Secret Manager
       envContent.push('');
       envContent.push('# Firebase Configuration (non-secret)');
-      envContent.push('VITE_FIREBASE_AUTH_DOMAIN=swarajyatrails.run.place');
+      envContent.push('VITE_FIREBASE_AUTH_DOMAIN=astute-buttress-463406-b8.firebaseapp.com');
       envContent.push('VITE_FIREBASE_PROJECT_ID=astute-buttress-463406-b8');
       envContent.push('VITE_FIREBASE_STORAGE_BUCKET=astute-buttress-463406-b8.firebasestorage.app');
       envContent.push('VITE_FIREBASE_MESSAGING_SENDER_ID=381076047248');
