@@ -45,7 +45,7 @@ steps:
           --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY" \
           --build-arg FIREBASE_API_KEY="$$FIREBASE_API_KEY" \
           --build-arg GOOGLE_MAPS_API_KEY="$$GOOGLE_MAPS_API_KEY" \
-          --build-arg FIREBASE_AUTH_DOMAIN="astute-buttress-463406-b8.firebaseapp.com" \
+          --build-arg FIREBASE_AUTH_DOMAIN="swarajyatrails.run.place" \
           --build-arg FIREBASE_PROJECT_ID="astute-buttress-463406-b8" \
           --build-arg FIREBASE_STORAGE_BUCKET="astute-buttress-463406-b8.firebasestorage.app" \
           --build-arg FIREBASE_MESSAGING_SENDER_ID="381076047248" \

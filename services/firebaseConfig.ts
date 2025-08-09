@@ -31,7 +31,8 @@ try {
 
 // Detect environment
 const isDevelopment = window.location.hostname === 'localhost' || 
-                     window.location.hostname === '127.0.0.1' || 
+                     window.location.hostname.startsWith('127.0.0.') ||
+                     window.location.hostname.endsWith('.local') ||
                      window.location.hostname.includes('dev') ||
                      window.location.port === '5173' ||
                      window.location.port === '3000';
