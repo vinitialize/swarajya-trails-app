@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, TouchEvent } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Castle } from 'lucide-react';
 import { ItineraryFilters } from '../services/geminiService';
@@ -314,6 +314,10 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
     const [expandedFort, setExpandedFort] = useState<string | null>(null);
     const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
     const regionRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
+    
+    // Swipe functionality
+    const [touchStartX, setTouchStartX] = useState<number | null>(null);
+    const [swipeOffset, setSwipeOffset] = useState<number>(0);
 
     const getFilteredRegions = (): RegionalForts[] => {
         return REGIONAL_FORTS.map(region => ({
@@ -408,11 +412,58 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
 
     const handleModeSwitch = (mode: 'suggestions' | 'custom') => {
         setInputMode(mode);
+        setSwipeOffset(0); // Reset swipe offset when switching modes
         if (mode === 'suggestions') {
             setCustomInput('');
             onFiltersChange({ ...filters, fortsList: '' });
             setInputError('');
         }
+    };
+    
+    // Touch handling for swipe functionality
+    const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+        setTouchStartX(e.touches[0].clientX);
+    };
+    
+    const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+        if (touchStartX === null) return;
+        
+        const touchCurrentX = e.touches[0].clientX;
+        const diff = touchCurrentX - touchStartX;
+        
+        // Get the width of the container to calculate the maximum swipe distance
+        const containerWidth = e.currentTarget.getBoundingClientRect().width;
+        const maxSwipeDistance = containerWidth / 2;
+        
+        // Limit the swipe offset to half the container width
+        let newOffset = 0;
+        if (inputMode === 'suggestions') {
+            // When in 'suggestions' mode, allow swiping left (negative direction)
+            newOffset = Math.max(-maxSwipeDistance, Math.min(0, diff));
+        } else {
+            // When in 'custom' mode, allow swiping right (positive direction)
+            newOffset = Math.min(maxSwipeDistance, Math.max(0, diff));
+        }
+        
+        setSwipeOffset(newOffset);
+    };
+    
+    const handleTouchEnd = () => {
+        if (touchStartX === null) return;
+        
+        // Determine if the swipe was significant enough to switch tabs
+        // If swipe distance is more than 1/4 of the container width, switch tabs
+        const threshold = 50; // Minimum pixels to trigger a tab switch
+        
+        if ((inputMode === 'suggestions' && swipeOffset < -threshold) ||
+            (inputMode === 'custom' && swipeOffset > threshold)) {
+            // Switch to the other mode
+            handleModeSwitch(inputMode === 'suggestions' ? 'custom' : 'suggestions');
+        }
+        
+        // Reset touch tracking and swipe offset
+        setTouchStartX(null);
+        setSwipeOffset(0);
     };
 
     const canGenerate = inputMode === 'suggestions' ? 
@@ -427,42 +478,46 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
                 Choose Your Adventure
             </h3>
             
-            {/* Adventure Mode Selector */}
+            {/* Adventure Mode Selector - with swipe support */}
             <div className="relative mb-8">
-                <div className="flex bg-gradient-to-r from-slate-100/80 to-gray-100/80 dark:from-slate-800/80 dark:to-slate-700/80 rounded-2xl p-1.5 border border-gray-200/60 dark:border-slate-600/60 shadow-inner backdrop-blur-sm">
+                <div 
+                    className="flex bg-gradient-to-r from-slate-100/80 to-gray-100/80 dark:from-slate-800/80 dark:to-slate-700/80 rounded-2xl p-1.5 border border-gray-200/60 dark:border-slate-600/60 shadow-inner backdrop-blur-sm relative overflow-hidden"
+                    onTouchStart={(e) => handleTouchStart(e)}
+                    onTouchMove={(e) => handleTouchMove(e)}
+                    onTouchEnd={() => handleTouchEnd()}
+                >
+                    {/* Sliding indicator - moves with swipe and animation */}
+                    <div 
+                        className="absolute top-1.5 bottom-1.5 w-1/2 rounded-xl transition-all duration-300 ease-in-out"
+                        style={{
+                            left: '6px', // 1.5 * 4px = 6px
+                            background: inputMode === 'suggestions' 
+                                ? 'linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229))' 
+                                : 'linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136))',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                            transform: inputMode === 'suggestions' 
+                                ? `translateX(${swipeOffset}px)` 
+                                : `translateX(calc(100% + ${swipeOffset}px))`
+                        }}
+                    ></div>
+
                     <button
                         onClick={() => handleModeSwitch('suggestions')}
-                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-200 ease-out group overflow-hidden ${
-                            inputMode === 'suggestions'
-                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 dark:shadow-blue-900/30 border border-blue-500/20 dark:border-blue-400/20'
-                                : 'text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/60 dark:hover:bg-slate-600/40'
-                        }`}
+                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-colors duration-300 ease-in-out group overflow-hidden z-10 ${inputMode === 'suggestions' ? 'text-white' : 'text-slate-600 dark:text-slate-300'}`}
                     >
-                        <div className="flex items-center justify-center gap-3">
-                            <span className="text-xl">🏰</span>
+                        <div className="flex items-center justify-center gap-3 relative z-10">
+                            <span className={`text-xl transition-all duration-300 ${inputMode === 'suggestions' ? 'scale-110 rotate-3' : ''}`}>🏰</span>
                             <span className="font-bold tracking-wide">Explore Forts</span>
                         </div>
-                        {inputMode === 'suggestions' && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-xl"></div>
-                        )}
                     </button>
                     <button
                         onClick={() => handleModeSwitch('custom')}
-                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-all duration-200 ease-out group overflow-hidden ${
-                            inputMode === 'custom'
-                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 dark:shadow-emerald-900/30 border border-emerald-500/20 dark:border-emerald-400/20'
-                                : 'text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/60 dark:hover:bg-slate-600/40'
-                        }`}
+                        className={`relative flex-1 py-4 px-6 rounded-xl text-sm font-bold transition-colors duration-300 ease-in-out group overflow-hidden z-10 ${inputMode === 'custom' ? 'text-white' : 'text-slate-600 dark:text-slate-300'}`}
                     >
-                        <div className="flex items-center justify-center gap-3">
-                            <span className={`text-xl transition-transform duration-200 ${
-                                inputMode === 'custom' ? 'scale-110' : 'group-hover:scale-105'
-                            }`}>🥾</span>
+                        <div className="flex items-center justify-center gap-3 relative z-10">
+                            <span className={`text-xl transition-all duration-300 ${inputMode === 'custom' ? 'scale-110 rotate-3' : ''}`}>🥾</span>
                             <span className="font-bold tracking-wide">Plan a Trek</span>
                         </div>
-                        {inputMode === 'custom' && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-xl"></div>
-                        )}
                     </button>
                 </div>
                 
