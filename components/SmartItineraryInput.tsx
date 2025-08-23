@@ -481,16 +481,17 @@ const SmartItineraryInput: React.FC<SmartItineraryInputProps> = ({
             {/* Adventure Mode Selector - with swipe support */}
             <div className="relative mb-8">
                 <div 
-                    className="flex bg-gradient-to-r from-slate-100/80 to-gray-100/80 dark:from-slate-800/80 dark:to-slate-700/80 rounded-2xl p-1.5 border border-gray-200/60 dark:border-slate-600/60 shadow-inner backdrop-blur-sm relative overflow-hidden"
+                    className="flex bg-gradient-to-r from-slate-100/80 to-gray-100/80 dark:from-slate-800/80 dark:to-slate-700/80 rounded-2xl p-1.5 sm:p-2 border border-gray-200/60 dark:border-slate-600/60 shadow-inner backdrop-blur-sm relative overflow-hidden"
                     onTouchStart={(e) => handleTouchStart(e)}
                     onTouchMove={(e) => handleTouchMove(e)}
                     onTouchEnd={() => handleTouchEnd()}
                 >
                     {/* Sliding indicator - moves with swipe and animation */}
                     <div 
-                        className="absolute top-1.5 bottom-1.5 w-1/2 rounded-xl transition-all duration-300 ease-in-out"
+                        className="absolute top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 rounded-xl transition-all duration-300 ease-in-out"
                         style={{
-                            left: '6px', // 1.5 * 4px = 6px
+                            left: '6px', // 1.5 * 4px = 6px padding on mobile, matches container padding
+                            width: 'calc(50% - 6px)', // Half width minus left padding
                             background: inputMode === 'suggestions' 
                                 ? 'linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229))' 
                                 : 'linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136))',
